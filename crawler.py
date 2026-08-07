@@ -7,7 +7,11 @@ from datetime import datetime, timedelta, timezone
 ctx = ssl.create_default_context()
 ctx.check_hostname = False
 ctx.verify_mode = ssl.CERT_NONE
-HEADERS = {"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) Chrome/120.0.0.0 Safari/537.36"}
+HEADERS = {
+    "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/128.0.0.0 Safari/537.36",
+    "Referer": "https://www.baidu.com",
+    "Accept-Language": "zh-CN,zh;q=0.9"
+}
 
 # ========== 核心配置区（可自行修改）==========
 MAX_PER_SOURCE = 5  # 单媒体最多5条新闻
@@ -107,41 +111,14 @@ def parse_rss(raw_xml: str):
 
 # ========= 新增：网页列表提取通用函数 =========
 def parse_web_list(html: str, source_name: str):
-    """
-    解析新浪财经、凤凰网首页新闻列表
-    返回格式统一：[{"title","link","desc","pub"}] 和RSS结构完全对齐
-    """
     result = []
-    # 清除多余换行空格
-    html_clean = re.sub(r'\s+', ' ', html)
-    
-    if source_name == "sina":
-        # 新浪财经新闻匹配：<a href="xxx" title="新闻标题">
-        pattern = re.compile(r'<a href="(https://finance\.sina\.com\.cn[^"]+)" title="([^"]+)"')
-        items = pattern.findall(html_clean)
-        for link, title in items[:20]:
-            result.append({
-                "title": title.strip(),
-                "link": link.strip(),
-                "desc": title,
-                "pub": ""
-            })
-    elif source_name == "phoenix":
-        # 凤凰网资讯链接匹配
-        pattern = re.compile(r'<a href="(https://www\.ifeng\.com[^"]+)" title="([^"]+)"')
-        items = pattern.findall(html_clean)
-        for link, title in items[:20]:
-            result.append({
-                "title": title.strip(),
-                "link": link.strip(),
-                "desc": title,
-                "pub": ""
-            })
-    else:
-        # 其他网页源通用a标签兜底提取
-        pattern = re.compile(r'<a href="(http[^"]+)" title="([^"]+)"')
-        items = pattern.findall(html_clean)
-        for link, title in items[:15]:
+    html_clean = html.replace("\n", "").replace("\r", "")
+    # 通用匹配所有带title的a新闻链接，不限域名
+    pattern = re.compile(r'<a[^>]+title="([^"]+)"[^>]+href="([^"]+)"')
+    items = pattern.findall(html_clean)
+    for title, link in items[:20]:
+        # 过滤无效链接、锚点、JS链接
+        if link.startswith("http") and len(title) > 3:
             result.append({
                 "title": title.strip(),
                 "link": link.strip(),
@@ -174,7 +151,7 @@ def is_news_recent(pub_str: str):
     return dt >= CUTOFF
 
 # 关键词过滤（白名单+黑名单双重校验）
-def match_keyword(title: str, summary: str) -> bool:
+# def match_keyword(title: str, summary: str) -> bool:
 #    full_text = title + summary
     # 命中黑名单直接过滤
 #    for bw in BLACK_KEYWORDS:
@@ -213,6 +190,7 @@ def add_news(source_cn: str, title: str, url: str, summary: str, pub_raw: str):
     return True
 
 # 批量加载所有源：区分rss / web 分支
+# 批量加载所有源：区分rss / web 分支
 def load_all_sources():
     for key, info in SOURCES.items():
         src_key = key
@@ -224,6 +202,7 @@ def load_all_sources():
         try:
             html = fetch(src_url)
             item_list = []
+            add_count = 0
             if src_type == "rss":
                 try:
                     item_list = parse_rss(html)
@@ -231,14 +210,17 @@ def load_all_sources():
                     print(f"{src_name} XML解析失败，第三方RSS接口已拦截：{str(xml_err)}", file=sys.stderr)
                     item_list = []
             elif src_type == "web":
-                # 网页源调用新增列表提取函数
+                # 打印网页源码调试片段
+                print(f"===={src_name}页面源码片段====")
+                print(html[:300])
                 item_list = parse_web_list(html, src_key)
             # 遍历过滤入库
             for it in item_list:
                 if not match_keyword(it["title"], it["desc"]):
                     continue
-                add_news(src_name, it["title"], it["link"], it["desc"], it["pub"])
-            print(f"{src_name} 抓取完成，有效过滤新闻：{len(item_list)}条")
+                if add_news(src_name, it["title"], it["link"], it["desc"], it["pub"]):
+                    add_count += 1
+            print(f"{src_name} 页面原始新闻{len(item_list)}条，过滤后入库{add_count}条")
         except Exception as e:
             print(f"{src_name} 抓取失败: {str(e)}", file=sys.stderr)
 
