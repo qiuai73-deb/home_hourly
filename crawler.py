@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""精简外媒涉华新闻爬虫：仅输出新闻清单，无正文抓取、无灾害API"""
+"""精简重要新闻爬虫：仅输出新闻清单"""
 import urllib.request, ssl, json, time, re, xml.etree.ElementTree as ET, sys, html as html_mod
 from datetime import datetime, timedelta, timezone
 from translator import batch_translate
@@ -13,14 +13,14 @@ MAX_PER_SOURCE = 5  # 每家媒体最多5条
 CUTOFF = datetime.now(timezone.utc) - timedelta(days=4)
 
 # 涉华过滤关键词
-CKW = ["china","chinese","beijing","xi jinping","li qiang","wang yi",
-       "taiwan","hong kong","xinjiang","tibet","south china sea",
-       "belt and road","huawei","tencent","alibaba","tiktok","shein",
-       "temu","cpec","renminbi","yuan","pboc","deepseek","baidu",
-       "xiaomi","chinese economy","chinese market","chinese official",
-       "sino-","brics","shanghai","shenzhen","guangzhou",
-       "people's liberation army","chinese military","chinese army",
-       "ccp","communist party of china","pla navy","pla air force","taiwan strait"]
+CKW = ["华为","鸿蒙","苹果","deepseek","比亚迪","小米",
+       "大疆","字节","腾讯","阿里","微信",
+       "三星","海力士","英伟达","谷歌","半导体","芯片",
+       "AI","人民币","抖音","股市","A股","ETF","财经",
+       "金融","经济","美元","纳斯达克",
+       "基金","私募","标普","道琼斯","日元",
+       "特朗普","龙头","智能","跳水",
+       "科创","创业","成交","科技","拉升"]
 PLA_RE = re.compile(r"\bpla\b", re.I)
 
 def is_cn(text: str) -> bool:
