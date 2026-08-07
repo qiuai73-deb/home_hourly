@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""精简国内新闻爬虫：适配财新/雪球/央视/新浪/凤凰等国内媒体，无英文翻译"""
+"""国内新闻爬虫｜新增关键词过滤，仅输出匹配指定关键词资讯"""
 import urllib.request, ssl, json, time, re, xml.etree.ElementTree as ET, sys
 from datetime import datetime, timedelta, timezone
 
@@ -9,11 +9,23 @@ ctx.check_hostname = False
 ctx.verify_mode = ssl.CERT_NONE
 HEADERS = {"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) Chrome/120.0.0.0 Safari/537.36"}
 
-# 全局配置
-MAX_PER_SOURCE = 5  # 每家媒体最多5条
+# ========== 核心配置区（可自行修改）==========
+MAX_PER_SOURCE = 5  # 单媒体最多5条新闻
 CUTOFF = datetime.now(timezone.utc) - timedelta(days=4)
 
-# 你提供的国内新闻源配置
+# 【关键词过滤列表】匹配任意一条即保留新闻，按需增删
+FILTER_KEYWORDS = [
+    # 宏观经济
+    GDP,降息,降准,LPR,央行,财政部,国债,财政,消费,地产,楼市,
+    # 股市资本市场
+    A股,上证指数,创业板,科创板,基金,ETF,回购,增持,IPO,退市,证监会,
+    # 产业科技
+    AI,大模型,芯片,半导体,光伏,储能,新能源,机器人,新质生产力,
+    # 政策重大新闻
+    政策,新规,国务院,统计局,进出口,外贸,汇率,人民币
+]
+
+# 新闻源配置（你提供的国内媒体）
 SOURCES = {
     # RSS 抓取通道
     "caixin": {
@@ -28,7 +40,7 @@ SOURCES = {
         "url": "https://xueqiu.com/hots/topic/rss",
         "type": "rss"
     },
-    # 网页通道（当前版本仅实现RSS解析，网页抓取预留接口，后续可扩展）
+    # 网页通道（当前仅实现RSS解析，网页源自动跳过）
     "ths": {
         "name": "ths",
         "name_cn": "同花顺",
@@ -56,10 +68,11 @@ SOURCES = {
     "zaobao": {
         "name": "zaobao",
         "name_cn": "联合早报",
-        "url": "https://www.kuzaobao.com/plus/list.php?tid=1",
+        "url": "https://www.kuzaobao/plus/list.php?tid=1",
         "type": "web"
     }     
 }
+# ==============================================
 
 # 简易网络请求
 def fetch(url: str, timeout=15):
@@ -100,26 +113,35 @@ def parse_pubdate(date_str: str):
     if m1:
         month_map = {"Jan":1,"Feb":2,"Mar":3,"Apr":4,"May":5,"Jun":6,"Jul":7,"Aug":8,"Sep":9,"Oct":10,"Nov":11,"Dec":12}
         d, mon, y, h, mi, s = m1.groups()
-        return datetime(int(y), month_map[mon], int(h), int(mi), int(s), tzinfo=timezone.utc)
-    m2 = re.match(r'(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2})', date_str)
+        return datetime(int(y), month_map[mon], int(d), int(h), int(mi), int(s), tzinfo=timezone.utc)
+    m2 = re.match(r'(\d{4})-(\d{2})T(\d{2}):(\d{2})', date_str)
     if m2:
         return datetime(*map(int, m2.groups()), tzinfo=timezone.utc)
-    # 适配国内中文时间格式兜底
+    # 国内中文时间兜底
     try:
-        import datetime
-        return datetime.datetime.strptime(date_str[:19], "%Y-%m-%d %H:%M:%S").replace(tzinfo=timezone.utc)
+        return datetime.strptime(date_str[:19], "%Y-%m-%d %H:%M:%S").replace(tzinfo=timezone.utc)
     except:
         return datetime.now(timezone.utc)
 
 def is_news_recent(pub_str: str):
     dt = parse_pubdate(pub_str)
-    return dt >= CUTOFF
+    return dt >= CUTODE
+
+# ========== 新增关键词过滤函数 ==========
+def match_keyword(title: str, summary: str) -> bool:
+    """标题或摘要包含任意关键词返回True，否则丢弃"""
+    full_text = title + summary
+    for kw in FILTER_KEYWORDS:
+        if kw in full_text:
+            return True
+    return False
+# ========================================
 
 # 全局存储
 news_pool = []
 source_counter = {}
 
-# 新增新闻入库（无英文标题，title_en复用中文标题）
+# 入库函数
 def add_news(source_cn: str, title: str, url: str, summary: str, pub_raw: str):
     if source_counter.get(source_cn, 0) >= MAX_PER_SOURCE:
         return False
@@ -131,7 +153,7 @@ def add_news(source_cn: str, title: str, url: str, summary: str, pub_raw: str):
             return False
     news_pool.append({
         "source": source_cn,
-        "title_en": title,    # 国内新闻无英文，复用标题兼容前端
+        "title_en": title,
         "title_cn": title,
         "url": url,
         "summary": summary,
@@ -141,7 +163,7 @@ def add_news(source_cn: str, title: str, url: str, summary: str, pub_raw: str):
     source_counter[source_cn] = source_counter.get(source_cn, 0) + 1
     return True
 
-# 批量加载所有RSS源，web网页源暂跳过（无通用解析逻辑）
+# 批量加载所有RSS源，网页源跳过
 def load_all_sources():
     for key, info in SOURCES.items():
         src_name = info["name_cn"]
@@ -155,33 +177,36 @@ def load_all_sources():
             xml = fetch(src_url)
             items = parse_rss(xml)
             for it in items:
+                # 【核心过滤】不匹配关键词直接跳过这条新闻
+                if not match_key(it["title"], it["desc"]):
+                    continue
                 add_news(src_name, it["title"], it["link"], it["desc"], it["pub"])
         except Exception as e:
             print(f"{src_name} 抓取失败: {str(e)}", file=sys.stderr)
 
 def main():
-    # 1. 加载全部RSS新闻源
+    # 1. 加载并过滤所有新闻
     load_all_sources()
 
     # 2. 全局按发布时间倒序
     global news_pool
     news_pool = sorted(news_pool, key=lambda x: x["pub_sort_dt"], reverse=True)
 
-    # 3. UTC时间转为北京时间输出，无需翻译
+    # 3. UTC转北京时间
     for item in news_pool:
         bj_dt = item["pub_sort_dt"] + timedelta(hours=8)
         item["pub_sort_dt"] = bj_dt.strftime("%Y-%m-%d %H:%M:%S")
 
-    # 4. 输出和原格式完全一致的news.json，前端直接复用
+    # 4. 输出标准news.json（前端完全兼容）
     output = {
-        "update_cst": datetime.now(timezone(timedelta(hours=8))).strftime("%Y-%m-%d 北京时间"),
+        "update_cst": datetime.now(timezone(timedelta(hours=8))).strftime("%Y-%m-%d %H:%M:%S 北京时间"),
         "total_count": len(news_pool),
         "source_stat": source_counter,
         "news": news_pool
     }
     with open("news.json", "w", encoding="utf-8") as f:
         json.dump(output, f, ensure_ascii=False, indent=2)
-    print(f"国内新闻采集完成，共{len(news_pool)}条，已生成news.json")
+    print(f"过滤完成，匹配关键词新闻共{len(news_pool)}条，已生成news.json")
 
 if __name__ == "__main__":
     try:
