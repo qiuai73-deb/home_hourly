@@ -13,18 +13,6 @@ HEADERS = {"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) Chrome/120.0
 MAX_PER_SOURCE = 5  # 单媒体最多5条新闻
 CUTOFF = datetime.now(timezone.utc) - timedelta(days=4)
 
-# 【关键词过滤列表】匹配任意一条即保留新闻，按需增删
-FILTER_KEYWORDS = [
-    # 宏观经济
-    GDP,降息,降准,LPR,央行,财政部,国债,财政,消费,地产,楼市,
-    # 股市资本市场
-    A股,上证指数,创业板,科创板,基金,ETF,回购,增持,IPO,退市,证监会,
-    # 产业科技
-    AI,大模型,芯片,半导体,光伏,储能,新能源,机器人,新质生产力,
-    # 政策重大新闻
-    政策,新规,国务院,统计局,进出口,外贸,汇率,人民币
-]
-
 # 新闻源配置（你提供的国内媒体）
 SOURCES = {
     # RSS 抓取通道
