@@ -15,10 +15,10 @@ CUTOFF = datetime.now(timezone.utc) - timedelta(days=4)
 
 # 白名单关键词：标题/摘要命中任意一条才保留新闻
 FILTER_KEYWORDS = [
-    "GDP","降息","降准","LPR","央行","美元","人民币","金融","消费","地产","财经","突发","重大"  
-    "A股","指数","创业","科创","基金","ETF","回购","增持","IPO","纳斯达克","证监会","私募","公募","标普","龙头","指数"
-    "AI","大模型","芯片","半导体","华为","鸿蒙","新能源","苹果","科技","deepseek","比亚迪","小米","大疆","字节","腾讯","阿里","微信","英伟达","谷歌","抖音","kimi","豆包"
-    "政策","新规","国务院","统计局","进出口","外贸","汇率","特朗普"
+#    "GDP","降息","降准","LPR","央行","美元","人民币","金融","消费","地产","财经","突发","重大"  
+#    "A股","指数","创业","科创","基金","ETF","回购","增持","IPO","纳斯达克","证监会","私募","公募","标普","龙头","指数"
+#    "AI","大模型","芯片","半导体","华为","鸿蒙","新能源","苹果","科技","deepseek","比亚迪","小米","大疆","字节","腾讯","阿里","微信","英伟达","谷歌","抖音","kimi","豆包"
+#    "政策","新规","国务院","统计局","进出口","外贸","汇率","特朗普"
 ]
 
 
@@ -209,7 +209,7 @@ def add_news(source_cn: str, title: str, url: str, summary: str, pub_raw: str):
         "pub_raw": pub_raw,
         "pub_sort_dt": parse_pubdate(pub_raw)
     })
-    source_counter[source_cn] = source_cn.get(source_cn, 0) + 1
+    source_counter[source_cn] = source_counter.get(source_cn, 0) + 1
     return True
 
 # 批量加载所有源：区分rss / web 分支
@@ -225,8 +225,11 @@ def load_all_sources():
             html = fetch(src_url)
             item_list = []
             if src_type == "rss":
-                # RSS源解析
-                item_list = parse_rss(html)
+                try:
+                    item_list = parse_rss(html)
+                except Exception as xml_err:
+                    print(f"{src_name} XML解析失败，第三方RSS接口已拦截：{str(xml_err)}", file=sys.stderr)
+                    item_list = []
             elif src_type == "web":
                 # 网页源调用新增列表提取函数
                 item_list = parse_web_list(html, src_key)
