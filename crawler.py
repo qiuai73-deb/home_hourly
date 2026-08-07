@@ -175,16 +175,16 @@ def is_news_recent(pub_str: str):
 
 # 关键词过滤（白名单+黑名单双重校验）
 def match_keyword(title: str, summary: str) -> bool:
-    full_text = title + summary
+#    full_text = title + summary
     # 命中黑名单直接过滤
-    for bw in BLACK_KEYWORDS:
-        if bw in full_text:
-            return False
+#    for bw in BLACK_KEYWORDS:
+#        if bw in full_text:
+#            return False
     # 匹配白名单才保留
-    for kw in FILTER_KEYWORDS:
-        if kw in full_text:
-            return True
-    return False
+#    for kw in FILTER_KEYWORDS:
+#        if kw in full_text:
+#            return True
+    return True
 
 # 全局存储
 news_pool = []
