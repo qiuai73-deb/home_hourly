@@ -1,0 +1,2 @@
+# 内置库已包含urllib/json/re，无第三方依赖，留空即可
+# 如需扩展可添加 lxml beautifulsoup4
