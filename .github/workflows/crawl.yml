@@ -1,0 +1,40 @@
+name: Auto Crawl Foreign China News
+# 定时：北京时间6:00-23:00每小时整点；同时支持手动触发
+on:
+  workflow_dispatch: # 这一行绝对不能删、不能缩进错
+# schedule 可以保留或删掉都无所谓
+
+# 授予仓库读写权限（用于提交更新news.json）
+permissions:
+  contents: write
+
+jobs:
+  crawl:
+    runs-on: ubuntu-latest
+    steps:
+      # 1. 拉取仓库代码
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      # 2. 设置Python3.12
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      # 3. 安装依赖（无第三方可省略）
+      - name: Install dependencies
+        run: pip install --upgrade pip
+
+      # 4. 执行爬虫
+      - name: Run crawler
+        run: python crawler.py
+
+      # 5. 提交更新后的news.json到仓库
+      - name: Commit & push data
+        run: |
+          git config --global user.name "GitHub Actions Bot"
+          git config --global user.email "actions@github.com"
+          git add news.json
+          git diff --quiet && git diff --staged --quiet || git commit -m "Auto update news data $(date '+%Y-%m-%d %H:%M')"
+          git push
