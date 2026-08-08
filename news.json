@@ -1,13 +1,22 @@
 {
-  "update_cst": "2026-08-08 10:35:11 北京时间",
-  "total_count": 17,
+  "update_cst": "2026-08-08 10:56:37 北京时间",
+  "total_count": 27,
   "source_stat": {
     "财新": 5,
     "雪球": 5,
     "东财": 5,
+    "新浪": 5,
+    "财联": 5,
     "联合早报": 2
   },
   "news": [
+    {
+      "source": "财新",
+      "title": "【CCI快报】：中国大宗商品指数周涨1.19% 白银领涨9.61%",
+      "url": "https://database.caixin.com/2026-08-08/102472486.html",
+      "summary": "　　【财新数据专稿】（刘晓芳）2026年8月7日，中国大宗商品指数（CCI）收报343.69，周涨1.19%。本周涨跌幅较为显著的品种包括：白银（涨9.61%）、焦煤（涨7.37%）、冶金焦炭（涨5.77%）、原油（跌2.75%）、乙二醇（跌3.70%）、甲醇（跌4.43%）。 <DIV class=\"article_i",
+      "pub_time": "2026-08-08 09:55:17"
+    },
     {
       "source": "财新",
       "title": "【周刊提前读】高占军专栏：沃什为何遭遇信任危机",
@@ -37,60 +46,123 @@
       "pub_time": "2026-08-08 08:48:59"
     },
     {
-      "source": "财新",
-      "title": "全国人大常委会：六名将领涉嫌严重违纪违法 被罢免全国人大代表",
-      "url": "https://china.caixin.com/2026-08-08/102472447.html",
-      "summary": "　　【财新网】近日，中国人大网公布2026年第四号全国人大常委会公报。其中首次公布，6月26日，在十四届全国人大常委会第二十三次会议上，被终止十四届全国人大代表资格的李兰祥、侯建国，分别涉嫌严重违纪违法、涉嫌重大责任事故罪。　　李兰祥此前担任山东省泰安市长，2026年2月辞去该职；侯建国此前担任贵州盘江精煤股份有限公司山脚树矿矿长。两人分别是被责令辞去、被罢免十四届全国人大代表职务。　　",
-      "pub_time": "2026-08-08 08:06:24"
-    },
-    {
       "source": "联合早报",
       "title": "中国公布抹黑车企案例引“竹知了”联想 学者：华为维权符官方原则但存“泛侵权化”",
       "url": "https://www.kuzaobao.com/news/china/202608/0478043.html",
       "summary": "中国公布抹黑车企案例引“竹知了”联想 学者：华为维权符官方原则但存“泛侵权化”",
-      "pub_time": "2026-08-08 02:35:23"
+      "pub_time": "2026-08-08 02:56:51"
     },
     {
       "source": "联合早报",
       "title": "下午察：遥遥领先的华为败给小小“竹知了”？",
       "url": "https://www.kuzaobao.com/news/china/202608/0478040.html",
       "summary": "下午察：遥遥领先的华为败给小小“竹知了”？",
-      "pub_time": "2026-08-08 02:35:23"
+      "pub_time": "2026-08-08 02:56:51"
     },
     {
-      "source": "东财",
-      "title": "黄金股“抢跑” 金价重返4300美元后还能走多远",
-      "url": "https://finance.eastmoney.com/a/202608083835609948.html",
-      "summary": "黄金股“抢跑” 金价重返4300美元后还能走多远",
-      "pub_time": "2026-08-08 02:35:20"
+      "source": "财联",
+      "title": "金价本周大涨7%，再破4400美元，白银狂飙；国际油价累跌7%",
+      "url": "https://www.cls.cn/detail/2449008",
+      "summary": "金价本周大涨7%，再破4400美元，白银狂飙；国际油价累跌7%",
+      "pub_time": "2026-08-08 02:56:49"
     },
     {
-      "source": "东财",
+      "source": "财联",
       "title": "重大进展！伊朗官员确认：与阿曼就海峡通行问题明确总体框架",
-      "url": "https://finance.eastmoney.com/a/202608083835793663.html",
+      "url": "https://www.cls.cn/detail/2449012",
       "summary": "重大进展！伊朗官员确认：与阿曼就海峡通行问题明确总体框架",
-      "pub_time": "2026-08-08 02:35:20"
+      "pub_time": "2026-08-08 02:56:49"
     },
     {
-      "source": "东财",
+      "source": "财联",
+      "title": "三大项目获5800万美元融资支持",
+      "url": "https://www.cls.cn/detail/2448967",
+      "summary": "三大项目获5800万美元融资支持",
+      "pub_time": "2026-08-08 02:56:49"
+    },
+    {
+      "source": "财联",
       "title": "特朗普宣布：将向关键矿产和电池项目投资30亿美元",
-      "url": "https://finance.eastmoney.com/a/202608083835806675.html",
+      "url": "https://www.cls.cn/detail/2449039",
       "summary": "特朗普宣布：将向关键矿产和电池项目投资30亿美元",
-      "pub_time": "2026-08-08 02:35:20"
+      "pub_time": "2026-08-08 02:56:49"
+    },
+    {
+      "source": "财联",
+      "title": "美股盘前要闻一览：苹果上调多款设备以旧换新回收价格；SK海力士拟投资380亿美元新建两座晶圆厂；美国7月“大非农”数据来袭",
+      "url": "https://www.cls.cn/detail/2448748",
+      "summary": "美股盘前要闻一览：苹果上调多款设备以旧换新回收价格；SK海力士拟投资380亿美元新建两座晶圆厂；美国7月“大非农”数据来袭",
+      "pub_time": "2026-08-08 02:56:49"
+    },
+    {
+      "source": "新浪",
+      "title": "中国概念股",
+      "url": "http://finance.sina.com.cn/stock/usstock/cnlist.html",
+      "summary": "中国概念股",
+      "pub_time": "2026-08-08 02:56:47"
+    },
+    {
+      "source": "新浪",
+      "title": "新浪财经芝麻AI",
+      "url": "https://ai.finance.sina.cn?symbol=pcsy",
+      "summary": "新浪财经芝麻AI",
+      "pub_time": "2026-08-08 02:56:47"
+    },
+    {
+      "source": "新浪",
+      "title": "新浪财经APP",
+      "url": "https://finance.sina.com.cn/mobile/comfinanceweb.shtml?source=caishou04",
+      "summary": "新浪财经APP",
+      "pub_time": "2026-08-08 02:56:47"
+    },
+    {
+      "source": "新浪",
+      "title": "聚焦2026基金二季报",
+      "url": "https://finance.sina.com.cn/zt_d/jjjjejb2026",
+      "summary": "聚焦2026基金二季报",
+      "pub_time": "2026-08-08 02:56:47"
+    },
+    {
+      "source": "新浪",
+      "title": "新浪财经全球资本峰会",
+      "url": "https://finance.sina.com.cn/zt_d/subject-1783394329/",
+      "summary": "新浪财经全球资本峰会",
+      "pub_time": "2026-08-08 02:56:47"
     },
     {
       "source": "东财",
-      "title": "全球市场：纳指涨超1% 标普创新高 光通信、太空板块大涨 SpaceX涨超15%",
-      "url": "https://finance.eastmoney.com/a/202608083835598697.html",
-      "summary": "全球市场：纳指涨超1% 标普创新高 光通信、太空板块大涨 SpaceX涨超15%",
-      "pub_time": "2026-08-08 02:35:20"
+      "title": "告别算力内卷：AI基建狂潮下，铜、铝、稀土的下一站在哪？",
+      "url": "https://finance.eastmoney.com/a/202606113768272213.html",
+      "summary": "告别算力内卷：AI基建狂潮下，铜、铝、稀土的下一站在哪？",
+      "pub_time": "2026-08-08 02:56:43"
     },
     {
       "source": "东财",
-      "title": "宇树科技IPO倒计时 下周一启动申购！受益股曝光",
-      "url": "https://finance.eastmoney.com/a/202608083835787592.html",
-      "summary": "宇树科技IPO倒计时 下周一启动申购！受益股曝光",
-      "pub_time": "2026-08-08 02:35:20"
+      "title": "私募究竟是谁在投？ 有钱人是如何做投资的？| 对话百亿私募总经理衍复投资顾王琴",
+      "url": "https://finance.eastmoney.com/a/202607023792170473.html",
+      "summary": "私募究竟是谁在投？ 有钱人是如何做投资的？| 对话百亿私募总经理衍复投资顾王琴",
+      "pub_time": "2026-08-08 02:56:43"
+    },
+    {
+      "source": "东财",
+      "title": "8月7日晚间沪深上市公司重大事项公告最新快递",
+      "url": "https://finance.eastmoney.com/a/202608073835369671.html",
+      "summary": "8月7日晚间沪深上市公司重大事项公告最新快递",
+      "pub_time": "2026-08-08 02:56:43"
+    },
+    {
+      "source": "东财",
+      "title": "高盛“唱多”+Rubin规模出货 PCB概念掀涨停潮！多只中报预增股获资金青睐(名单)",
+      "url": "https://finance.eastmoney.com/a/202608073835005718.html",
+      "summary": "高盛“唱多”+Rubin规模出货 PCB概念掀涨停潮！多只中报预增股获资金青睐(名单)",
+      "pub_time": "2026-08-08 02:56:43"
+    },
+    {
+      "source": "东财",
+      "title": "A股三大指数涨幅均超过1% 稀土与创新药板块大涨",
+      "url": "https://finance.eastmoney.com/a/202608073835146843.html",
+      "summary": "A股三大指数涨幅均超过1% 稀土与创新药板块大涨",
+      "pub_time": "2026-08-08 02:56:43"
     },
     {
       "source": "雪球",
