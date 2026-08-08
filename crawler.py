@@ -59,22 +59,22 @@ SOURCES = {
     },
     "ths": {
         "name_cn": "同花顺",
-        "url": "https://stock.10jqka.com.cn/ywjh_list",
+        "url": "hhttps://www.10jqka.com.cn/classic",
         "type": "web"
     },
     "eastmoney": {
         "name_cn": "东财",
-        "url": "https://finance.eastmoney.com/yaowen.html",
+        "url": "https://finance.eastmoney.com/a/cywjh.html",
+        "type": "web"
+    },
+    "sina": {
+        "name_cn": "新浪",
+        "url": "https://finance.sina.com.cn",
         "type": "web"
     },
     "cls": {
         "name_cn": "财联",
-        "url": "https://www.cls.cn/depth?id=1000",
-        "type": "web"
-    },
-    "cctv": {
-        "name_cn": "央视新闻",
-        "url": "https://news.cctv.cn/china",
+        "url": "https://www.cls.cn",
         "type": "web"
     },
     "zaobao": {
