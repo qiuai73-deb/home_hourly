@@ -1,10 +1,9 @@
 #!/usr/bin/env python3
 """
 国内多源新闻聚合爬虫（稳健版）
-- 使用通用 a 标签遍历策略，兼容各类网站结构
-- 关键词过滤（标题或摘要含关键词）
-- 每个源最多 15 条
-- 未知时间自动设为当前时间
+- 每个源默认 5 条，同花顺 10 条
+- 时间显示 UTC 原始时间（不加 8 小时）
+- 关键词过滤
 - 生成 index.html 和 news.json
 - 仅在 6:00~23:00（北京时间）执行
 """
@@ -24,8 +23,9 @@ import requests
 from bs4 import BeautifulSoup
 
 # ---------- 配置 ----------
-MAX_PER_SOURCE = 15
-CUTOFF_DAYS = 7             # 放宽到7天，避免旧新闻被丢弃
+DEFAULT_MAX = 5              # 普通源最多保留条数
+SPECIAL_MAX = {"ths": 10}    # 同花顺特殊设置 10 条
+CUTOFF_DAYS = 7              # 只保留最近 7 天（放宽）
 USER_AGENT = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) Chrome/120.0.0.0 Safari/537.36"
 
 # ---------- 关键词过滤 ----------
@@ -38,6 +38,7 @@ KEYWORDS = [
     "科技", "deepseek", "比亚迪", "小米", "大疆", "字节", "腾讯", "阿里","知情人士",
     "微信", "英伟达", "谷歌", "抖音", "kimi", "豆包","年报","龙头",
     "银行", "高盛", "利润", "统计局", "大摩", "小摩", "汇率", "特朗普"
+    # 更多关键词可按需启用
 ]
 KEYWORD_PATTERN = re.compile('|'.join(KEYWORDS), re.IGNORECASE)
 
@@ -124,7 +125,7 @@ def parse_rss(xml_text):
             results.append({"title": title, "link": link, "summary": summary, "pub": pub})
     return results
 
-# ---------- Web 解析（稳健策略：遍历所有 a 标签） ----------
+# ---------- Web 解析（稳健策略） ----------
 def parse_web_generic(html, base_url):
     soup = BeautifulSoup(html, "html.parser")
     candidates = []
@@ -136,35 +137,28 @@ def parse_web_generic(html, base_url):
         raw_url = a.get("href", "")
         if not raw_url or raw_url.startswith('#') or raw_url.startswith('javascript:'):
             continue
-        # 补全链接
         full_url = urljoin(base_url, raw_url)
-        # 排除根域名本身
         if full_url.strip('/') == base_url.strip('/'):
             continue
-        # 标题长度过滤（至少5个字符）
         if len(title) < 5 or len(title) > 100:
             continue
-        # 排除功能性文字
         if any(k in title for k in invalid_keywords):
             continue
-        # 去重
         if full_url in seen_urls:
             continue
         seen_urls.add(full_url)
 
-        # 尝试提取时间（如果有）
         pub = ""
         time_tag = a.find_previous("time") or a.find_next("time")
         if time_tag:
             pub = time_tag.get("datetime") or time_tag.get_text(strip=True)
-        # 如果找不到时间，留空（后续处理为当前时间）
         candidates.append({
             "title": title,
             "link": full_url,
             "summary": title,
             "pub": pub
         })
-        if len(candidates) >= 200:   # 防止过多
+        if len(candidates) >= 200:
             break
 
     return candidates
@@ -208,7 +202,6 @@ def parse_pubdate(date_str):
                     return dt
             except:
                 continue
-    # 尝试提取数字（如 "2026-08-07"）
     nums = re.findall(r'\d+', date_str)
     if len(nums) >= 3:
         try:
@@ -223,21 +216,18 @@ def parse_pubdate(date_str):
 news_pool = []
 source_counter = {}
 
-def add_news(source_name, title, url, summary, pub_raw):
+def add_news(source_name, title, url, summary, pub_raw, max_limit):
     if not title:
         return False
-    # 关键词过滤
     if not is_relevant(title + " " + summary):
         return False
-    if source_counter.get(source_name, 0) >= MAX_PER_SOURCE:
+    if source_counter.get(source_name, 0) >= max_limit:
         return False
     dt = parse_pubdate(pub_raw)
     if dt is None:
-        dt = datetime.now(timezone.utc)   # 未知时间使用当前时间
-    # 时间过滤（放宽到7天）
+        dt = datetime.now(timezone.utc)
     if datetime.now(timezone.utc) - dt > timedelta(days=CUTOFF_DAYS):
         return False
-    # 去重
     for item in news_pool:
         if item["url"] == url or item["title"] == title:
             return False
@@ -256,6 +246,8 @@ def process_source(source_key, source_cfg):
     name = source_cfg["name_cn"]
     url = source_cfg["url"]
     stype = source_cfg["type"]
+    # 确定该源的最大条数
+    max_limit = SPECIAL_MAX.get(source_key, DEFAULT_MAX)
     items = []
     try:
         if stype == "rss":
@@ -273,19 +265,18 @@ def process_source(source_key, source_cfg):
 
     print(f"📌 {name} 原始抓取 {len(items)} 条")
 
-    # 按时间降序（未知时间排最后）
     items.sort(key=lambda x: parse_pubdate(x["pub"]) or datetime.min.replace(tzinfo=timezone.utc), reverse=True)
     count = 0
     for it in items:
-        if add_news(name, it["title"], it["link"], it["summary"], it["pub"]):
+        if add_news(name, it["title"], it["link"], it["summary"], it["pub"], max_limit):
             count += 1
-        if count >= MAX_PER_SOURCE:
+        if count >= max_limit:
             break
-    print(f"✅ {name} 过滤后保留 {count} 条")
+    print(f"✅ {name} 过滤后保留 {count} 条 (上限 {max_limit})")
 
-# ---------- 生成 HTML ----------
+# ---------- 生成 HTML（时间显示 UTC，不加 8 小时） ----------
 def generate_html():
-    bj_now = datetime.now(timezone(timedelta(hours=8)))
+    bj_now = datetime.now(timezone.utc)   # 显示 UTC 时间
     html_content = f"""<!DOCTYPE html>
 <html lang="zh-CN">
 <head>
@@ -318,7 +309,7 @@ body {{ font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Hel
 <div class="container">
     <div class="header">
         <h1>📰 国内新闻聚合</h1>
-        <div class="info">更新: {bj_now.strftime('%Y-%m-%d %H:%M:%S')} 北京时间 · 共 {len(news_pool)} 条</div>
+        <div class="info">更新: {bj_now.strftime('%Y-%m-%d %H:%M:%S')} UTC · 共 {len(news_pool)} 条</div>
     </div>
     <div class="news-list">
 """
@@ -328,7 +319,8 @@ body {{ font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Hel
         for item in news_pool:
             title = html.escape(item["title"]) if item["title"] else "（无标题）"
             summary = html.escape(item["summary"])[:200] if item["summary"] else ""
-            dt = item["pub_dt"] + timedelta(hours=8)
+            # 直接显示 UTC 时间（不 +8）
+            dt = item["pub_dt"]
             if dt.year < 2000:
                 time_str = "未知时间"
             else:
@@ -339,7 +331,7 @@ body {{ font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Hel
             <div class="summary">{summary}…</div>
             <div class="meta">
                 <span class="source">{item["source"]}</span>
-                <span>🕒 {time_str}</span>
+                <span>🕒 {time_str} UTC</span>
             </div>
         </div>
 """
@@ -354,6 +346,7 @@ body {{ font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Hel
 
 # ---------- 主函数 ----------
 def main():
+    # 仍以北京时间判断运行时段（6:00~23:00）
     bj_now = datetime.now(timezone(timedelta(hours=8)))
     if not (6 <= bj_now.hour <= 23):
         print(f"⏰ 当前北京时间 {bj_now.strftime('%H:%M')} 不在运行时段 (6:00-23:00)，退出。")
@@ -379,7 +372,7 @@ def main():
                 "title": n["title"],
                 "url": n["url"],
                 "summary": n["summary"],
-                "pub_time": (n["pub_dt"] + timedelta(hours=8)).strftime('%Y-%m-%d %H:%M:%S') if n["pub_dt"].year > 2000 else "未知时间"
+                "pub_time": n["pub_dt"].strftime('%Y-%m-%d %H:%M:%S') if n["pub_dt"].year > 2000 else "未知时间"
             }
             for n in news_pool
         ]
