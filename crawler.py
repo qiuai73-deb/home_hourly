@@ -24,7 +24,6 @@ from bs4 import BeautifulSoup
 
 # ---------- 配置 ----------
 DEFAULT_MAX = 5
-SPECIAL_MAX = {"ths": 10}
 CUTOFF_DAYS = 3               # 只保留最近3天新闻
 USER_AGENT = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) Chrome/120.0.0.0 Safari/537.36"
 REQUEST_TIMEOUT = 10
