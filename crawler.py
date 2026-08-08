@@ -161,12 +161,24 @@ def parse_web_generic(html, base_url):
     candidates = []
     seen_urls = set()
     invalid_keywords = ["关于我们", "版权声明", "隐私政策", "登录", "注册", "首页", "下载App", "更多", "快讯", "实时"]
+    # 提取根域名用于补全残缺链接
+    from urllib.parse import urlparse
+    parse_base = urlparse(base_url)
+    base_domain = f"{parse_base.scheme}://{parse_base.netloc}"
+
     for a in soup.find_all("a", href=True):
         title = a.get_text(strip=True)
-        raw_url = a.get("href", "")
-        if not raw_url or raw_url.startswith('#') or raw_url.startswith('javascript:'):
+        raw_href = a.get("href", "").strip()
+        if not raw_href or raw_href.startswith('#') or raw_href.startswith('javascript:'):
             continue
-        full_url = urljoin(base_url, raw_url)
+        # 分情况补全链接
+        if raw_href.startswith("http"):
+            full_url = raw_href
+        elif raw_href.startswith("/"):
+            full_url = base_domain + raw_href
+        else:
+            full_url = urljoin(base_url, raw_href)
+
         if full_url.strip('/') == base_url.strip('/'):
             continue
         if len(title) < 5 or len(title) > 100:
@@ -287,7 +299,7 @@ def process_source(source_key, source_cfg):
     items.sort(key=lambda x: parse_pubdate(x["pub"]) or datetime.min.replace(tzinfo=timezone.utc), reverse=True)
     count = 0
     for it in items:
-        if add_news(name, it["link"], it["title"], it["summary"], it["pub"], max_limit):
+        if add_news(name, it["title"], it["link"], it["summary"], it["pub"], max_limit):
             count += 1
         if count >= max_limit:
             break
