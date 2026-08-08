@@ -116,7 +116,7 @@
                         const div = document.createElement('div');
                         div.className = 'top-news-item';
                         // 使用 pub_raw 显示原始时间
-                        const timeDisplay = item.pub_raw || '未知时间';
+                        const timeDisplay = item.pub_beijing || item.pub_raw || '未知时间';
                         div.innerHTML = `
                             <div class="top-cn-title">${item.title || '（无标题）'}</div>
                             <div class="top-meta-row">
