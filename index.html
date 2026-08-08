@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>新闻聚合</title>
+    <title>国内新闻聚合</title>
     <style>
         * {margin:0; padding:0; box-sizing:border-box; font-family:system-ui, -apple-system, "Microsoft Yahei", sans-serif;}
         body {background:#f5f7fa; color:#222; padding:20px; max-width:1400px; margin:0 auto;}
@@ -36,15 +36,15 @@
         }
         .top-news-item:hover {background:rgba(255,255,255,0.08);}
         .top-cn-title {font-size:16px; font-weight:500; margin-bottom:4px;}
-        .top-meta-row {display:flex; gap:16px; font-size:12px; opacity:0.85;}
+        .top-meta-row {display:flex; gap:16px; font-size:12px; opacity:0.85; flex-wrap:wrap;}
 
-        /* 分媒体板块原有样式 */
+        /* 分媒体板块 */
         .media-block {background:#fff; border-radius:12px; padding:20px; margin-bottom:16px; box-shadow:0 2px 8px #00000008;}
         .media-title {font-size:18px; font-weight:600; margin-bottom:14px; color:#112948; border-left:4px solid #0066cc; padding-left:12px;}
         .news-item {border-bottom:1px solid #eee; padding:14px 8px; cursor:pointer; transition:background 0.2s;}
         .news-item:hover {background:#f0f7ff;}
         .cn-title {font-size:16px; font-weight:500; margin-bottom:4px; color:#111;}
-        .en-title {font-size:13px; color:#666; line-height:1.5;}
+        .summary-text {font-size:13px; color:#555; line-height:1.5; margin-top:4px;}
         .pub-time {font-size:12px; color:#888; margin-top:6px;}
         .loading {text-align:center; padding:60px; font-size:18px; color:#555;}
         .error-box {color:#dc2626; text-align:center; padding:60px; font-size:16px; line-height:1.8;}
@@ -52,7 +52,7 @@
 </head>
 <body>
     <header>
-        <h1>🌍 国内最新新闻聚合</h1>
+        <h1>📰 国内新闻聚合</h1>
         <div class="meta-info">
             <div id="update-time">加载中...</div>
             <div id="total-count"></div>
@@ -60,125 +60,110 @@
         </div>
     </header>
 
-    <!-- 新增：全媒体混排最新15条区域 -->
+    <!-- 全媒体混排最新15条 -->
     <section id="top-latest-wrap"></section>
 
-    <!-- 原有分媒体列表区域 -->
+    <!-- 分媒体列表 -->
     <main id="news-container">
-        <div class="loading">正在拉取最新新闻数据，请稍候...</div>
+        <div class="loading">正在加载新闻数据...</div>
     </main>
 
     <script>
-// UTC时间转北京时间工具函数
-function utcToBeijing(utcStr) {
-    if (!utcStr) return "未知时间";
-    let iso = utcStr.replace(" UTC", "Z").replace(" ", "T");
-    const date = new Date(iso);
-    if (isNaN(date.getTime())) return utcStr;
-    const bjDate = new Date(date.getTime() + 8 * 3600 * 1000);
-    const y = bjDate.getFullYear();
-    const m = String(bjDate.getMonth() + 1).padStart(2, "0");
-    const d = String(bjDate.getDate()).padStart(2, "0");
-    const h = String(bjDate.getHours()).padStart(2, "0");
-    const mi = String(bjDate.getMinutes()).padStart(2, "0");
-    const s = String(bjDate.getSeconds()).padStart(2, "0");
-    return `${y}-${m}-${d} ${h}:${mi}:${s}`;
-}
+        async function loadNews() {
+            const container = document.getElementById('news-container');
+            const topWrap = document.getElementById('top-latest-wrap');
+            try {
+                const res = await fetch('./news.json');
+                if (!res.ok) {
+                    container.innerHTML = `<div class="error-box">无法读取新闻数据文件，请等待自动采集完成。</div>`;
+                    topWrap.innerHTML = '';
+                    return;
+                }
+                const data = await res.json();
 
-async function loadNews() {
-    const container = document.getElementById("news-container");
-    const topWrap = document.getElementById("top-latest-wrap");
-    try {
-        const res = await fetch("./news.json");
-        if (!res.ok) {
-            container.innerHTML = `<div class="error-box">无法读取新闻数据文件<br>请前往Actions手动运行一次爬虫生成news.json</div>`;
-            topWrap.innerHTML = "";
-            return;
+                if (data.error) {
+                    container.innerHTML = `<div class="error-box">采集失败：${data.error}</div>`;
+                    topWrap.innerHTML = '';
+                    return;
+                }
+
+                if (!data || !Array.isArray(data.news) || !data.source_stat) {
+                    container.innerHTML = `<div class="error-box">数据格式异常，请检查 crawler.py 是否正常运行。</div>`;
+                    topWrap.innerHTML = '';
+                    return;
+                }
+
+                // 更新顶部信息
+                document.getElementById('update-time').innerText = `最后更新：${data.update_cst || '未知'}`;
+                document.getElementById('total-count').innerText = `总新闻数：${data.total_count || 0} 条`;
+                const statsBox = document.getElementById('stats-container');
+                statsBox.innerHTML = '';
+                Object.entries(data.source_stat).forEach(([src, cnt]) => {
+                    const tag = document.createElement('span');
+                    tag.className = 'tag';
+                    tag.innerText = `${src}：${cnt}条`;
+                    statsBox.appendChild(tag);
+                });
+
+                // ---------- 顶部最新15条 ----------
+                topWrap.innerHTML = '';
+                const top15 = data.news.slice(0, 15);
+                if (top15.length > 0) {
+                    const block = document.createElement('div');
+                    block.className = 'top-latest-block';
+                    block.innerHTML = `<div class="top-block-title">🔥 综合最新15条（按发布时间倒序）</div>`;
+                    top15.forEach(item => {
+                        const div = document.createElement('div');
+                        div.className = 'top-news-item';
+                        div.innerHTML = `
+                            <div class="top-cn-title">${item.title || '（无标题）'}</div>
+                            <div class="top-meta-row">
+                                <span>来源：${item.source}</span>
+                                <span>${item.pub_time || '未知时间'}</span>
+                            </div>
+                        `;
+                        if (item.url) div.onclick = () => window.open(item.url, '_blank');
+                        block.appendChild(div);
+                    });
+                    topWrap.appendChild(block);
+                }
+
+                // ---------- 分媒体列表 ----------
+                const grouped = {};
+                data.news.forEach(item => {
+                    if (!grouped[item.source]) grouped[item.source] = [];
+                    grouped[item.source].push(item);
+                });
+                container.innerHTML = '';
+                Object.entries(grouped).forEach(([media, items]) => {
+                    const block = document.createElement('div');
+                    block.className = 'media-block';
+                    block.innerHTML = `<div class="media-title">${media}（${items.length}条）</div>`;
+                    items.forEach(item => {
+                        const div = document.createElement('div');
+                        div.className = 'news-item';
+                        div.innerHTML = `
+                            <div class="cn-title">${item.title || '（无标题）'}</div>
+                            <div class="summary-text">${item.summary ? item.summary.substring(0, 120) + '…' : ''}</div>
+                            <div class="pub-time">发布时间：${item.pub_time || '未知时间'}</div>
+                        `;
+                        if (item.url) div.onclick = () => window.open(item.url, '_blank');
+                        block.appendChild(div);
+                    });
+                    container.appendChild(block);
+                });
+
+                if (data.news.length === 0) {
+                    container.innerHTML = `<div class="error-box">暂无新闻，等待下一轮采集。</div>`;
+                }
+            } catch (err) {
+                container.innerHTML = `<div class="error-box">加载失败：${err.message}</div>`;
+                topWrap.innerHTML = '';
+                console.error(err);
+            }
         }
-        const data = await res.json();
 
-        if (data.error) {
-            container.innerHTML = `<div class="error-box">爬虫采集失败：${data.error}<br>重新运行Actions爬虫任务重试</div>`;
-            topWrap.innerHTML = "";
-            return;
-        }
-
-        if (!data || !Array.isArray(data.news) || !data.source_stat) {
-            container.innerHTML = `<div class="error-box">新闻数据格式异常，等待下一轮自动采集更新</div>`;
-            topWrap.innerHTML = "";
-            return;
-        }
-
-        // 顶部统计信息
-        document.getElementById("update-time").innerText = `最后自动更新：${data.update_cst || "未知"}`;
-        document.getElementById("total-count").innerText = `当前新闻总数：${data.total_count || 0} 条`;
-        const statsBox = document.getElementById("stats-container");
-        statsBox.innerHTML = "";
-        Object.entries(data.source_stat).forEach(([src, cnt])=>{
-            const tag = document.createElement("span");
-            tag.className = "tag";
-            tag.innerText = `${src}：${cnt}条`;
-            statsBox.appendChild(tag);
-        })
-
-        // ========== 新增：顶部全局混排最新15条 ==========
-        topWrap.innerHTML = "";
-        const top15News = data.news.slice(0, 15);
-        if (top15News.length > 0) {
-            const topBlock = document.createElement("div");
-            topBlock.className = "top-latest-block";
-            topBlock.innerHTML = `<div class="top-block-title">🔥 综合最新15条（全媒体混排，按发布时间倒序）</div>`;
-            top15News.forEach(news=>{
-                const itemDom = document.createElement("div");
-                itemDom.className = "top-news-item";
-                itemDom.innerHTML = `
-                    <div class="top-cn-title">${news.title_cn || "无中文标题"}</div>
-                    <div class="top-meta-row">
-                        <span>来源：${news.source}</span>
-                        <span>${news.pub_sort_dt || news.pub_raw || "未知时间"}</span>
-                    </div>
-                `;
-                if (news.url) itemDom.onclick = ()=> window.open(news.url, "_blank");
-                topBlock.appendChild(itemDom);
-            })
-            topWrap.appendChild(topBlock);
-        }
-
-        // ========== 原有分媒体列表渲染逻辑不变 ==========
-        const groupMap = {};
-        data.news.forEach(item=>{
-            if(!groupMap[item.source]) groupMap[item.source] = [];
-            groupMap[item.source].push(item);
-        })
-        container.innerHTML = "";
-        Object.entries(groupMap).forEach(([media, newsArr])=>{
-            const block = document.createElement("div");
-            block.className = "media-block";
-            block.innerHTML = `<div class="media-title">${media}（${newsArr.length}条）</div>`;
-            newsArr.forEach(news=>{
-                const itemDom = document.createElement("div");
-                itemDom.className = "news-item";
-                itemDom.innerHTML = `
-                    <div class="cn-title">${news.title_cn || "无中文标题"}</div>
-                    <div class="en-title">原文：${news.title_en || "无标题"}</div>
-                    <div class="pub-time">发布时间：${news.pub_sort_dt || news.pub_raw || "未知时间"}</div>
-                `;
-                if (news.url) itemDom.onclick = ()=> window.open(news.url, "_blank");
-                block.appendChild(itemDom);
-            })
-            container.appendChild(block);
-        })
-
-        if (data.news.length === 0) {
-            container.innerHTML = `<div class="error-box">暂无符合条件的新闻，等待下一轮采集</div>`;
-        }
-    } catch (err) {
-        container.innerHTML = `<div class="error-box">数据加载异常：${err.message}<br>1.检查Actions爬虫是否运行成功<br>2.等待整点自动重新采集</div>`;
-        topWrap.innerHTML = "";
-        console.error("加载失败详情：", err);
-    }
-}
-window.onload = loadNews;
-</script>
+        window.onload = loadNews;
+    </script>
 </body>
 </html>
