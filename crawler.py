@@ -248,57 +248,51 @@ def parse_zaobao(html, base_url):
     return items
 
 # ---------- 通用备用解析（增强） ----------
-def parse_generic(html, base_url):
+def parse_web_generic(html, base_url):
+    """
+    使用 fetch_news.py 的稳健策略：提取所有 a 标签，智能过滤
+    """
     soup = BeautifulSoup(html, "html.parser")
-    items = []
-    # 尝试多种常见容器
-    containers = soup.select("ul.list li, div.news-item, div.article-item, div.list-item, div.item, div.news-list li")
-    if not containers:
-        containers = soup.find_all("a", href=True)
-    for a in containers:
-        if a.name == "a":
-            title = a.get_text(strip=True)
-            link = a.get("href", "")
-        else:
-            a_tag = a.find("a")
-            if not a_tag:
-                continue
-            title = a_tag.get_text(strip=True)
-            link = a_tag.get("href", "")
-        if not title or len(title) < 5 or len(title) > 100:
+    candidates = []
+    seen_urls = set()
+    invalid_keywords = ["关于我们", "版权声明", "隐私政策", "登录", "注册", "首页", "下载App", "更多", "快讯", "实时"]
+
+    for a in soup.find_all("a", href=True):
+        title = a.get_text(strip=True)
+        raw_url = a["href"]
+        if not raw_url or raw_url.startswith('#') or raw_url.startswith('javascript:'):
             continue
-        # 过滤非新闻链接
-        if any(key in title.lower() for key in ["首页", "关于", "登录", "注册", "广告", "招聘", "服务", "隐私"]):
+        # 补全链接
+        full_url = urljoin(base_url, raw_url)
+        # 排除根域名本身
+        if full_url.strip('/') == base_url.strip('/'):
             continue
-        if link.startswith("javascript") or link.startswith("#"):
+        # 标题长度过滤（至少 5 个字符，避免导航）
+        if len(title) < 5 or len(title) > 100:
             continue
-        if link.startswith("/"):
-            link = urllib.parse.urljoin(base_url, link)
-        elif not link.startswith("http"):
+        # 排除功能按钮
+        if any(k in title for k in invalid_keywords):
             continue
-        # 尝试提取时间
+        # 去重
+        if full_url in seen_urls:
+            continue
+        seen_urls.add(full_url)
+        # 尝试提取时间（若有）
         pub = ""
         time_tag = a.find_previous("time") or a.find_next("time")
         if time_tag:
             pub = time_tag.get("datetime") or time_tag.get_text(strip=True)
-        if not pub:
-            parent = a.parent
-            for _ in range(3):
-                if parent:
-                    time_tag = parent.find("time") or parent.find("span", class_=re.compile(r"time|date"))
-                    if time_tag:
-                        pub = time_tag.get("datetime") or time_tag.get_text(strip=True)
-                        break
-                    parent = parent.parent
-        items.append({"title": title, "link": link, "summary": title, "pub": pub})
-    # 去重
-    seen = set()
-    unique = []
-    for it in items:
-        if it["link"] not in seen:
-            seen.add(it["link"])
-            unique.append(it)
-    return unique
+        # 若没有时间，留空（后续设为当前时间）
+        candidates.append({
+            "title": title,
+            "link": full_url,
+            "summary": title,
+            "pub": pub
+        })
+        if len(candidates) >= 200:  # 限制候选数量，防止过多
+            break
+
+    return candidates
 
 # ---------- 时间解析 ----------
 def parse_pubdate(date_str):
@@ -345,30 +339,15 @@ def parse_pubdate(date_str):
 news_pool = []
 source_counter = {}
 
-def add_news(source_name, title, url, summary, pub_raw):
-    # 关键词过滤
-    if not is_relevant(title + " " + summary):
-        return False
-    if source_counter.get(source_name, 0) >= MAX_PER_SOURCE:
-        return False
+def add_news(...):
     dt = parse_pubdate(pub_raw)
     if dt is None:
-        dt = datetime.now(timezone.utc)
-    if datetime.now(timezone.utc) - dt > timedelta(days=CUTOFF_DAYS):
+        dt = datetime.now(timezone.utc)  # 未知时间则使用当前时间
+    # 不要强制 CUTOFF_DAYS，只对明显旧新闻（如超过7天）丢弃，或直接不丢弃
+    # 若仍需时间过滤，可放宽到 7 天
+    if datetime.now(timezone.utc) - dt > timedelta(days=7):
         return False
-    for item in news_pool:
-        if item["url"] == url or item["title"] == title:
-            return False
-    news_pool.append({
-        "source": source_name,
-        "title": title,
-        "url": url,
-        "summary": summary,
-        "pub_raw": pub_raw,
-        "pub_dt": dt
-    })
-    source_counter[source_name] = source_counter.get(source_name, 0) + 1
-    return True
+    # 其余逻辑...
 
 def process_source(source_key, source_cfg):
     name = source_cfg["name_cn"]
