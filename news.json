@@ -1,126 +1,134 @@
 {
-  "update": "2026-08-08 14:28",
-  "count": 15,
+  "update_cst": "2026-08-08 14:36:43 北京时间",
+  "total_count": 15,
+  "source_stat": {
+    "财新": 8,
+    "雪球": 8,
+    "同花顺": 20,
+    "东方财富": 20,
+    "新浪财经": 20,
+    "财联社": 20
+  },
   "news": [
     {
       "source": "财联社",
       "title": "美股盘前要闻一览：苹果上调多款设备以旧换新回收价格；SK海力士拟投资380亿美元新建两座晶圆厂；美国7月“大非农”数据来袭",
       "url": "https://www.cls.cn/detail/2448748",
       "summary": "美股盘前要闻一览：苹果上调多款设备以旧换新回收价格；SK海力士拟投资380亿美元新建两座晶圆厂；美国7月“大非农”数据来袭",
-      "pub_dt": "2026-08-08 20:22:00+00:00",
-      "pub_beijing": "2026-08-09 04:22"
-    },
-    {
-      "source": "同花顺",
-      "title": "千亿级私募景林大调仓！清仓英伟达Meta，美股持仓暴降43%",
-      "url": "http://fund.10jqka.com.cn/20260808/c678788536.shtml",
-      "summary": "千亿级私募景林大调仓！清仓英伟达Meta，美股持仓暴降43%",
-      "pub_dt": "2026-08-08 16:25:00+00:00",
-      "pub_beijing": "2026-08-09 00:25"
-    },
-    {
-      "source": "同花顺",
-      "title": "中金普洛斯、光谷产业园REIT更换代管基金经理 差异化资产规避利益冲突",
-      "url": "http://fund.10jqka.com.cn/20260808/c678788492.shtml",
-      "summary": "中金普洛斯、光谷产业园REIT更换代管基金经理 差异化资产规避利益冲突",
-      "pub_dt": "2026-08-08 16:25:00+00:00",
-      "pub_beijing": "2026-08-09 00:25"
-    },
-    {
-      "source": "同花顺",
-      "title": "工业母机产业投资基金独投 硕橙科技完成超亿元级D+轮融资",
-      "url": "http://news.10jqka.com.cn/20260808/c678788149.shtml",
-      "summary": "工业母机产业投资基金独投 硕橙科技完成超亿元级D+轮融资",
-      "pub_dt": "2026-08-08 16:25:00+00:00",
-      "pub_beijing": "2026-08-09 00:25"
-    },
-    {
-      "source": "同花顺",
-      "title": "国融基金总经理变更",
-      "url": "http://fund.10jqka.com.cn/20260808/c678788023.shtml",
-      "summary": "国融基金总经理变更",
-      "pub_dt": "2026-08-08 16:25:00+00:00",
-      "pub_beijing": "2026-08-09 00:25"
-    },
-    {
-      "source": "同花顺",
-      "title": "股价腰斩之际，葛卫东逆势加仓存储龙头！曾喊话AI没结束",
-      "url": "http://fund.10jqka.com.cn/20260807/c678767845.shtml",
-      "summary": "股价腰斩之际，葛卫东逆势加仓存储龙头！曾喊话AI没结束",
-      "pub_dt": "2026-08-08 16:25:00+00:00",
-      "pub_beijing": "2026-08-09 00:25"
-    },
-    {
-      "source": "同花顺",
-      "title": "中欧基金策略会：2026下半年，科技、债市走势如何？",
-      "url": "http://bond.10jqka.com.cn/20260807/c678767157.shtml",
-      "summary": "中欧基金策略会：2026下半年，科技、债市走势如何？",
-      "pub_dt": "2026-08-08 16:25:00+00:00",
-      "pub_beijing": "2026-08-09 00:25"
+      "pub_beijing": "2026-08-09 04:22",
+      "pub_time": "2026-08-08 20:22:00"
     },
     {
       "source": "新浪财经",
       "title": "新浪财经全球资本峰会",
       "url": "https://finance.sina.com.cn/zt_d/subject-1783394329/",
       "summary": "新浪财经全球资本峰会",
-      "pub_dt": "2026-08-08 14:16:00+00:00",
-      "pub_beijing": "2026-08-08 22:16"
+      "pub_beijing": "2026-08-08 22:16",
+      "pub_time": "2026-08-08 14:16:00"
     },
     {
       "source": "新浪财经",
       "title": "聚焦2026基金二季报",
       "url": "https://finance.sina.com.cn/zt_d/jjjjejb2026",
       "summary": "聚焦2026基金二季报",
-      "pub_dt": "2026-08-08 14:16:00+00:00",
-      "pub_beijing": "2026-08-08 22:16"
+      "pub_beijing": "2026-08-08 22:16",
+      "pub_time": "2026-08-08 14:16:00"
+    },
+    {
+      "source": "新浪财经",
+      "title": "新浪财经APP",
+      "url": "javascript:;",
+      "summary": "新浪财经APP",
+      "pub_beijing": "2026-08-08 22:16",
+      "pub_time": "2026-08-08 14:16:00"
+    },
+    {
+      "source": "新浪财经",
+      "title": "新浪财经芝麻AI",
+      "url": "https://ai.finance.sina.cn?symbol=pcsy",
+      "summary": "新浪财经芝麻AI",
+      "pub_beijing": "2026-08-08 22:16",
+      "pub_time": "2026-08-08 14:16:00"
     },
     {
       "source": "新浪财经",
       "title": "布伦特原油暗盘跌破82美元，日内跌超1.6%。",
       "url": "https://wap.cj.sina.cn/pc/7x24/5031833",
       "summary": "布伦特原油暗盘跌破82美元，日内跌超1.6%。",
-      "pub_dt": "2026-08-08 14:16:00+00:00",
-      "pub_beijing": "2026-08-08 22:16"
+      "pub_beijing": "2026-08-08 22:16",
+      "pub_time": "2026-08-08 14:16:00"
     },
     {
       "source": "新浪财经",
       "title": "美联储支持加息阵营扩大",
       "url": "https://finance.sina.com.cn/stock/hkstock/hkstocknews/2026-08-08/doc-inimqccz6652193.shtml",
       "summary": "美联储支持加息阵营扩大",
-      "pub_dt": "2026-08-08 14:16:00+00:00",
-      "pub_beijing": "2026-08-08 22:16"
+      "pub_beijing": "2026-08-08 22:16",
+      "pub_time": "2026-08-08 14:16:00"
     },
     {
       "source": "新浪财经",
       "title": "贝莱德大佬解读非农转负 放言“如今加息已经没有太大意义”",
       "url": "https://finance.sina.com.cn/roll/2026-08-08/doc-inimpsqc4514482.shtml",
       "summary": "贝莱德大佬解读非农转负 放言“如今加息已经没有太大意义”",
-      "pub_dt": "2026-08-08 14:16:00+00:00",
-      "pub_beijing": "2026-08-08 22:16"
+      "pub_beijing": "2026-08-08 22:16",
+      "pub_time": "2026-08-08 14:16:00"
     },
     {
       "source": "新浪财经",
       "title": "金价探底回升，黄金创今年以来最佳表现",
       "url": "https://finance.sina.com.cn/jjxw/2026-08-08/doc-inimqimv4308190.shtml",
       "summary": "金价探底回升，黄金创今年以来最佳表现",
-      "pub_dt": "2026-08-08 14:16:00+00:00",
-      "pub_beijing": "2026-08-08 22:16"
+      "pub_beijing": "2026-08-08 22:16",
+      "pub_time": "2026-08-08 14:16:00"
     },
     {
       "source": "新浪财经",
       "title": "黄金股“抢跑”",
       "url": "https://finance.sina.com.cn/jjxw/2026-08-08/doc-inimpwvz9986466.shtml",
       "summary": "黄金股“抢跑”",
-      "pub_dt": "2026-08-08 14:16:00+00:00",
-      "pub_beijing": "2026-08-08 22:16"
+      "pub_beijing": "2026-08-08 22:16",
+      "pub_time": "2026-08-08 14:16:00"
     },
     {
       "source": "新浪财经",
-      "title": "5连涨！资金抢购这类基金，还能重仓吗？",
-      "url": "https://finance.sina.com.cn/roll/2026-08-07/doc-inimmtwp4222464.shtml",
-      "summary": "5连涨！资金抢购这类基金，还能重仓吗？",
-      "pub_dt": "2026-08-08 14:16:00+00:00",
-      "pub_beijing": "2026-08-08 22:16"
+      "title": "加息，突变！美联储，最新发声！美股全线下跌",
+      "url": "https://finance.sina.com.cn/stock/zqgd/2026-08-07/doc-inimmtwv0176282.shtml",
+      "summary": "加息，突变！美联储，最新发声！美股全线下跌",
+      "pub_beijing": "2026-08-08 22:16",
+      "pub_time": "2026-08-08 14:16:00"
+    },
+    {
+      "source": "新浪财经",
+      "title": "今日视点：从开户数“结构性温差”看A股生态升级",
+      "url": "https://finance.sina.com.cn/jjxw/2026-08-07/doc-inimmtwx3268729.shtml",
+      "summary": "今日视点：从开户数“结构性温差”看A股生态升级",
+      "pub_beijing": "2026-08-08 22:16",
+      "pub_time": "2026-08-08 14:16:00"
+    },
+    {
+      "source": "新浪财经",
+      "title": "8月8日收盘：标普指数再创新高，三大指数本周均录得较大涨幅",
+      "url": "https://finance.sina.com.cn/stock/usstock/c/2026-08-08/doc-inimpsqe0060496.shtml",
+      "summary": "8月8日收盘：标普指数再创新高，三大指数本周均录得较大涨幅",
+      "pub_beijing": "2026-08-08 22:16",
+      "pub_time": "2026-08-08 14:16:00"
+    },
+    {
+      "source": "同花顺",
+      "title": "德适-B半年报亮眼：AI 收入翻倍 完成AI医疗平台升级",
+      "url": "http://stock.10jqka.com.cn/20260808/c678788545.shtml",
+      "summary": "德适-B半年报亮眼：AI 收入翻倍 完成AI医疗平台升级",
+      "pub_beijing": "2026-08-08 22:08",
+      "pub_time": "2026-08-08 14:08:00"
+    },
+    {
+      "source": "财联社",
+      "title": "多家A股公司：收到美国关税退税",
+      "url": "https://www.cls.cn/detail/2449086",
+      "summary": "多家A股公司：收到美国关税退税",
+      "pub_beijing": "2026-08-08 22:02",
+      "pub_time": "2026-08-08 14:02:00"
     }
   ]
 }
