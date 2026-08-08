@@ -1,11 +1,11 @@
 #!/usr/bin/env python3
 """
-国内多源新闻聚合爬虫（稳健版 - 增强时间提取）
+国内多源新闻聚合爬虫（稳定版 - 北京时间统一显示）
 - 每个源默认 5 条，同花顺 10 条
-- 时间显示原文原始字符串（强提取）
-- 关键词过滤
+- 时间优先显示北京时间（解析后 +8 小时）
+- 若解析失败则显示原始字符串
+- 排序基于解析时间，失败时排最后
 - 生成 index.html 和 news.json
-- 仅在 6:00~23:00（北京时间）执行
 """
 
 import ssl
@@ -23,12 +23,12 @@ import requests
 from bs4 import BeautifulSoup
 
 # ---------- 配置 ----------
-DEFAULT_MAX = 5              # 普通源最多保留条数
-SPECIAL_MAX = {"ths": 10}    # 同花顺特殊设置 10 条
-CUTOFF_DAYS = 7              # 只保留最近 7 天（放宽）
+DEFAULT_MAX = 5
+SPECIAL_MAX = {"ths": 10}
+CUTOFF_DAYS = 7
 USER_AGENT = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) Chrome/120.0.0.0 Safari/537.36"
 
-# ---------- 关键词过滤 ----------
+# ---------- 关键词 ----------
 KEYWORDS = [
     "GDP", "降息", "加息", "LPR", "央行", "美元", "人民币", "金融", "消费", "券商","证券",
     "地产", "财经", "突发", "重大","独家", "重大", "黄金","CPI","路透","彭博","周期",
@@ -41,46 +41,18 @@ KEYWORDS = [
 ]
 KEYWORD_PATTERN = re.compile('|'.join(KEYWORDS), re.IGNORECASE)
 
-def is_relevant(text: str) -> bool:
+def is_relevant(text):
     return bool(KEYWORD_PATTERN.search(text))
 
 # ---------- 新闻源 ----------
 SOURCES = {
-    "caixin": {
-        "name_cn": "财新",
-        "url": "https://quanwenrss.com/caixin",
-        "type": "rss"
-    },
-    "snowball": {
-        "name_cn": "雪球",
-        "url": "https://xueqiu.com/hots/topic/rss",
-        "type": "rss"
-    },
-    "ths": {
-        "name_cn": "同花顺",
-        "url": "https://www.10jqka.com.cn/classic",
-        "type": "web"
-    },
-    "eastmoney": {
-        "name_cn": "东财",
-        "url": "https://finance.eastmoney.com/a/cywjh.html",
-        "type": "web"
-    },
-    "sina": {
-        "name_cn": "新浪",
-        "url": "https://finance.sina.com.cn",
-        "type": "web"
-    },
-    "cls": {
-        "name_cn": "财联",
-        "url": "https://www.cls.cn",
-        "type": "web"
-    },
-    "zaobao": {
-        "name_cn": "联合早报",
-        "url": "https://www.kuzaobao.com/plus/list.php?tid=1",
-        "type": "web"
-    }
+    "caixin": {"name_cn": "财新", "url": "https://quanwenrss.com/caixin", "type": "rss"},
+    "snowball": {"name_cn": "雪球", "url": "https://xueqiu.com/hots/topic/rss", "type": "rss"},
+    "ths": {"name_cn": "同花顺", "url": "https://www.10jqka.com.cn/classic", "type": "web"},
+    "eastmoney": {"name_cn": "东财", "url": "https://finance.eastmoney.com/a/cywjh.html", "type": "web"},
+    "sina": {"name_cn": "新浪", "url": "https://finance.sina.com.cn/roll/#pageid=384&lid=2671&k=&num=50&page=1", "type": "web"},
+    "cls": {"name_cn": "财联", "url": "https://www.cls.cn", "type": "web"},
+    "zaobao": {"name_cn": "联合早报", "url": "https://www.kuzaobao.com/plus/list.php?tid=1", "type": "web"}
 }
 
 # ---------- 网络请求 ----------
@@ -124,17 +96,15 @@ def parse_rss(xml_text):
             results.append({"title": title, "link": link, "summary": summary, "pub": pub})
     return results
 
-# ---------- 时间提取辅助函数 ----------
+# ---------- 时间提取辅助（增强） ----------
 def extract_time_from_element(element):
-    """
-    从元素及其父级中智能提取时间字符串
-    """
-    # 检查自身和父级（最多往上找5层）
+    # 检查自身及父级
     for parent in [element] + list(element.parents)[:5]:
         if parent is None:
             continue
         # 1. 查找所有可能包含时间的标签
         for tag in parent.find_all(['time', 'span', 'div', 'p']):
+            # 检查 class
             class_str = ' '.join(tag.get('class', []))
             if any(k in class_str.lower() for k in ['time', 'date', 'pub', 'publish', 'post', 'info', 'meta']):
                 text = tag.get_text(strip=True)
@@ -143,7 +113,12 @@ def extract_time_from_element(element):
             dt = tag.get('datetime')
             if dt:
                 return dt
-        # 2. 如果父级是块级元素，检查其文本中的日期模式
+            # 检查 data-time 等属性
+            for attr in ['data-time', 'data-date', 'data-publish']:
+                val = tag.get(attr)
+                if val:
+                    return val
+        # 2. 在父级文本中搜索日期模式
         if parent.name and parent.name not in ['a', 'span', 'p']:
             text = parent.get_text(separator=' ', strip=True)
             patterns = [
@@ -152,7 +127,7 @@ def extract_time_from_element(element):
                 r'\d{4}/\d{1,2}/\d{1,2}',               # 2026/08/08
                 r'\d{1,2}月\d{1,2}日',                  # 8月8日
                 r'\d{4}年\d{1,2}月\d{1,2}日',           # 2026年8月8日
-                r'\d{1,2}:\d{2}',                       # 10:30（仅时间，可能不完整，但可备用）
+                r'\d{1,2}:\d{2}',                       # 10:30（可能不完整）
             ]
             for pat in patterns:
                 m = re.search(pat, text)
@@ -160,7 +135,7 @@ def extract_time_from_element(element):
                     return m.group()
     return ""
 
-# ---------- Web 解析（增强版） ----------
+# ---------- Web 解析 ----------
 def parse_web_generic(html, base_url):
     soup = BeautifulSoup(html, "html.parser")
     candidates = []
@@ -183,9 +158,7 @@ def parse_web_generic(html, base_url):
             continue
         seen_urls.add(full_url)
 
-        # ---- 增强时间提取 ----
         pub = extract_time_from_element(a)
-
         candidates.append({
             "title": title,
             "link": full_url,
@@ -196,7 +169,7 @@ def parse_web_generic(html, base_url):
             break
     return candidates
 
-# ---------- 时间解析（用于排序） ----------
+# ---------- 时间解析（返回 datetime UTC） ----------
 def parse_pubdate(date_str):
     if not date_str:
         return None
@@ -209,6 +182,7 @@ def parse_pubdate(date_str):
         r'(\d{4})/(\d{1,2})/(\d{1,2})',
         r'(\d{1,2})月(\d{1,2})日',
         r'(\d{1,2})-(\d{1,2}) (\d{2}):(\d{2})',  # 08-08 10:30
+        r'(\d{1,2})/(\d{1,2}) (\d{2}):(\d{2})',  # 08/08 10:30
     ]
     for pat in patterns:
         m = re.match(pat, date_str)
@@ -223,7 +197,7 @@ def parse_pubdate(date_str):
                 elif len(groups) == 5:
                     y, mon, d, h, mi = map(int, groups)
                     return datetime(y, mon, d, h, mi, tzinfo=timezone.utc)
-                elif len(groups) == 4:  # 08-08 10:30
+                elif len(groups) == 4:
                     mon, d, h, mi = map(int, groups)
                     now = datetime.now(timezone.utc)
                     y = now.year
@@ -267,8 +241,9 @@ def add_news(source_name, title, url, summary, pub_raw, max_limit):
         return False
     dt = parse_pubdate(pub_raw)
     if dt is None:
-        dt = datetime.now(timezone.utc)
-    if datetime.now(timezone.utc) - dt > timedelta(days=CUTOFF_DAYS):
+        dt = datetime(1970, 1, 1, tzinfo=timezone.utc)  # 解析失败排最后
+    # 时间过滤（只对解析成功且超过7天的丢弃）
+    if dt.year > 1970 and datetime.now(timezone.utc) - dt > timedelta(days=CUTOFF_DAYS):
         return False
     for item in news_pool:
         if item["url"] == url or item["title"] == title:
@@ -305,7 +280,7 @@ def process_source(source_key, source_cfg):
         return
 
     print(f"📌 {name} 原始抓取 {len(items)} 条")
-
+    # 排序
     items.sort(key=lambda x: parse_pubdate(x["pub"]) or datetime.min.replace(tzinfo=timezone.utc), reverse=True)
     count = 0
     for it in items:
@@ -315,7 +290,7 @@ def process_source(source_key, source_cfg):
             break
     print(f"✅ {name} 过滤后保留 {count} 条 (上限 {max_limit})")
 
-# ---------- 生成 HTML（时间显示原文原始字符串） ----------
+# ---------- 生成 HTML ----------
 def generate_html():
     bj_now = datetime.now(timezone(timedelta(hours=8)))
     html_content = f"""<!DOCTYPE html>
@@ -360,15 +335,20 @@ body {{ font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Hel
         for item in news_pool:
             title = html.escape(item["title"]) if item["title"] else "（无标题）"
             summary = html.escape(item["summary"])[:200] if item["summary"] else ""
-            # 直接显示原文原始时间字符串
-            pub_display = item["pub_raw"] if item["pub_raw"] else "未知时间"
+            # 显示北京时间：若pub_dt有效且非1970，则转为北京时间字符串
+            if item["pub_dt"].year > 1970:
+                beijing_time = item["pub_dt"] + timedelta(hours=8)
+                time_display = beijing_time.strftime('%Y-%m-%d %H:%M') + " 北京时间"
+            else:
+                # 若解析失败，显示原始字符串或“未知”
+                time_display = item["pub_raw"] if item["pub_raw"] else "未知时间"
             html_content += f"""
         <div class="news-item">
             <div class="title"><a href="{item["url"]}" target="_blank">{title}</a></div>
             <div class="summary">{summary}…</div>
             <div class="meta">
                 <span class="source">{item["source"]}</span>
-                <span>🕒 {pub_display}</span>
+                <span>🕒 {time_display}</span>
             </div>
         </div>
 """
@@ -409,7 +389,7 @@ def main():
                 "url": n["url"],
                 "summary": n["summary"],
                 "pub_raw": n["pub_raw"],
-                "pub_time": n["pub_dt"].strftime('%Y-%m-%d %H:%M:%S') if n["pub_dt"].year > 2000 else "未知时间"
+                "pub_beijing": (n["pub_dt"] + timedelta(hours=8)).strftime('%Y-%m-%d %H:%M:%S') + " 北京时间" if n["pub_dt"].year > 1970 else None
             }
             for n in news_pool
         ]
