@@ -69,7 +69,7 @@ SOURCES = {
     },
     "sina": {
         "name_cn": "新浪",
-        "url": "https://finance.sina.com.cn",
+        "url": "https://finance.sina.com.cn/roll/#pageid=384&lid=2671&k=&num=50&page=1",
         "type": "web"
     },
     "cls": {
