@@ -98,36 +98,41 @@ def parse_rss(xml_text):
 
 # ---------- 时间提取辅助（增强） ----------
 def extract_time_from_element(element):
-    # 检查自身及父级
+    """
+    从元素及其父级中智能提取时间字符串（增强版）
+    """
+    # 先检查元素自身及其父级
     for parent in [element] + list(element.parents)[:5]:
         if parent is None:
             continue
-        # 1. 查找所有可能包含时间的标签
-        for tag in parent.find_all(['time', 'span', 'div', 'p']):
-            # 检查 class
+        
+        # 1. 查找时间标签
+        for tag in parent.find_all(['time', 'span', 'div', 'p', 'em', 'i']):
             class_str = ' '.join(tag.get('class', []))
-            if any(k in class_str.lower() for k in ['time', 'date', 'pub', 'publish', 'post', 'info', 'meta']):
+            # 扩展关键词匹配
+            if any(k in class_str.lower() for k in ['time', 'date', 'pub', 'publish', 'post', 'info', 'meta', 'source', 'from']):
                 text = tag.get_text(strip=True)
                 if text and len(text) >= 4:
                     return text
             dt = tag.get('datetime')
             if dt:
                 return dt
-            # 检查 data-time 等属性
-            for attr in ['data-time', 'data-date', 'data-publish']:
-                val = tag.get(attr)
-                if val:
-                    return val
-        # 2. 在父级文本中搜索日期模式
+        
+        # 2. 在父级文本中搜索完整时间格式
         if parent.name and parent.name not in ['a', 'span', 'p']:
             text = parent.get_text(separator=' ', strip=True)
+            # 支持更多时间格式
             patterns = [
-                r'\d{4}-\d{1,2}-\d{1,2}',               # 2026-08-08
-                r'\d{1,2}-\d{1,2} \d{2}:\d{2}',         # 08-08 10:30
-                r'\d{4}/\d{1,2}/\d{1,2}',               # 2026/08/08
-                r'\d{1,2}月\d{1,2}日',                  # 8月8日
-                r'\d{4}年\d{1,2}月\d{1,2}日',           # 2026年8月8日
-                r'\d{1,2}:\d{2}',                       # 10:30（可能不完整）
+                r'\d{4}-\d{1,2}-\d{1,2} \d{1,2}:\d{2}',           # 2026-08-08 10:30
+                r'\d{4}/\d{1,2}/\d{1,2} \d{1,2}:\d{2}',           # 2026/08/08 10:30
+                r'\d{4}年\d{1,2}月\d{1,2}日 \d{1,2}:\d{2}',       # 2026年8月8日 10:30
+                r'\d{1,2}月\d{1,2}日 \d{1,2}:\d{2}',              # 8月8日 10:30
+                r'\d{1,2}:\d{2}',                                 # 10:30 (仅时间)
+                r'\d{4}-\d{1,2}-\d{1,2}',                         # 2026-08-08
+                r'\d{1,2}-\d{1,2} \d{1,2}:\d{2}',                 # 08-08 10:30
+                r'\d{4}/\d{1,2}/\d{1,2}',                         # 2026/08/08
+                r'\d{1,2}月\d{1,2}日',                            # 8月8日
+                r'\d{4}年\d{1,2}月\d{1,2}日',                     # 2026年8月8日
             ]
             for pat in patterns:
                 m = re.search(pat, text)
@@ -175,15 +180,17 @@ def parse_pubdate(date_str):
         return None
     date_str = date_str.strip()
     patterns = [
-        r'\w{3}, (\d{1,2}) (\w{3}) (\d{4}) (\d{2}):(\d{2}):(\d{2})',
-        r'(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2})',
-        r'(\d{4})-(\d{2})-(\d{2}) (\d{2}):(\d{2})',
-        r'(\d{4})年(\d{1,2})月(\d{1,2})日',
-        r'(\d{4})/(\d{1,2})/(\d{1,2})',
-        r'(\d{1,2})月(\d{1,2})日',
-        r'(\d{1,2})-(\d{1,2}) (\d{2}):(\d{2})',  # 08-08 10:30
-        r'(\d{1,2})/(\d{1,2}) (\d{2}):(\d{2})',  # 08/08 10:30
+        r'\w{3}, (\d{1,2}) (\w{3}) (\d{4}) (\d{2}):(\d{2}):(\d{2})',  # RSS格式
+        r'(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2})',                   # ISO
+        r'(\d{4})-(\d{2})-(\d{2}) (\d{2}):(\d{2})',                   # 标准
+        r'(\d{4})年(\d{1,2})月(\d{1,2})日 (\d{1,2}):(\d{2})',         # 中文完整时间
+        r'(\d{1,2})月(\d{1,2})日 (\d{1,2}):(\d{2})',                  # 月日 时:分
+        r'(\d{4})年(\d{1,2})月(\d{1,2})日',                           # 中文日期
+        r'(\d{4})/(\d{1,2})/(\d{1,2})',                               # 斜杠
+        r'(\d{1,2})月(\d{1,2})日',                                    # 月日
+        r'(\d{1,2}):(\d{2})',                                         # 仅时间
     ]
+    # ... 其余解析逻辑保持不变
     for pat in patterns:
         m = re.match(pat, date_str)
         if m:
@@ -243,6 +250,7 @@ def add_news(source_name, title, url, summary, pub_raw, max_limit):
     if dt is None:
         dt = datetime(1970, 1, 1, tzinfo=timezone.utc)  # 解析失败排最后
     # 时间过滤（只对解析成功且超过7天的丢弃）
+    # 计算北京时间
     if dt.year > 1970 and datetime.now(timezone.utc) - dt > timedelta(days=CUTOFF_DAYS):
         return False
     for item in news_pool:
@@ -292,7 +300,8 @@ def process_source(source_key, source_cfg):
 
 # ---------- 生成 HTML ----------
 def generate_html():
-    bj_now = datetime.now(timezone(timedelta(hours=8)))
+    # 在 generate_html 中
+    pub_display = item.get("pub_beijing") or item.get("pub_raw") or "未知时间"
     html_content = f"""<!DOCTYPE html>
 <html lang="zh-CN">
 <head>
