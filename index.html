@@ -144,7 +144,8 @@
                     items.forEach(item => {
                         const div = document.createElement('div');
                         div.className = 'news-item';
-                        const timeDisplay = item.pub_raw || '未知时间';
+                        // 在顶部和分媒体列表中，替换时间显示为：
+                        const timeDisplay = item.pub_beijing || item.pub_raw || '未知时间';
                         div.innerHTML = `
                             <div class="cn-title">${item.title || '（无标题）'}</div>
                             <div class="summary-text">${item.summary ? item.summary.substring(0, 120) + '…' : ''}</div>
