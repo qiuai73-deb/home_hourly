@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
 """
-国内多源新闻聚合爬虫（稳健版）
+国内多源新闻聚合爬虫（稳健版 - 增强时间提取）
 - 每个源默认 5 条，同花顺 10 条
-- 时间显示原文原始字符串（不加转换）
+- 时间显示原文原始字符串（强提取）
 - 关键词过滤
 - 生成 index.html 和 news.json
 - 仅在 6:00~23:00（北京时间）执行
@@ -38,7 +38,6 @@ KEYWORDS = [
     "科技", "deepseek", "比亚迪", "小米", "大疆", "字节", "腾讯", "阿里","知情人士",
     "微信", "英伟达", "谷歌", "抖音", "kimi", "豆包","年报","龙头",
     "银行", "高盛", "利润", "统计局", "大摩", "小摩", "汇率"
-    # 更多关键词可按需启用
 ]
 KEYWORD_PATTERN = re.compile('|'.join(KEYWORDS), re.IGNORECASE)
 
@@ -125,7 +124,43 @@ def parse_rss(xml_text):
             results.append({"title": title, "link": link, "summary": summary, "pub": pub})
     return results
 
-# ---------- Web 解析（稳健策略） ----------
+# ---------- 时间提取辅助函数 ----------
+def extract_time_from_element(element):
+    """
+    从元素及其父级中智能提取时间字符串
+    """
+    # 检查自身和父级（最多往上找5层）
+    for parent in [element] + list(element.parents)[:5]:
+        if parent is None:
+            continue
+        # 1. 查找所有可能包含时间的标签
+        for tag in parent.find_all(['time', 'span', 'div', 'p']):
+            class_str = ' '.join(tag.get('class', []))
+            if any(k in class_str.lower() for k in ['time', 'date', 'pub', 'publish', 'post', 'info', 'meta']):
+                text = tag.get_text(strip=True)
+                if text and len(text) >= 4:
+                    return text
+            dt = tag.get('datetime')
+            if dt:
+                return dt
+        # 2. 如果父级是块级元素，检查其文本中的日期模式
+        if parent.name and parent.name not in ['a', 'span', 'p']:
+            text = parent.get_text(separator=' ', strip=True)
+            patterns = [
+                r'\d{4}-\d{1,2}-\d{1,2}',               # 2026-08-08
+                r'\d{1,2}-\d{1,2} \d{2}:\d{2}',         # 08-08 10:30
+                r'\d{4}/\d{1,2}/\d{1,2}',               # 2026/08/08
+                r'\d{1,2}月\d{1,2}日',                  # 8月8日
+                r'\d{4}年\d{1,2}月\d{1,2}日',           # 2026年8月8日
+                r'\d{1,2}:\d{2}',                       # 10:30（仅时间，可能不完整，但可备用）
+            ]
+            for pat in patterns:
+                m = re.search(pat, text)
+                if m:
+                    return m.group()
+    return ""
+
+# ---------- Web 解析（增强版） ----------
 def parse_web_generic(html, base_url):
     soup = BeautifulSoup(html, "html.parser")
     candidates = []
@@ -148,10 +183,9 @@ def parse_web_generic(html, base_url):
             continue
         seen_urls.add(full_url)
 
-        pub = ""
-        time_tag = a.find_previous("time") or a.find_next("time")
-        if time_tag:
-            pub = time_tag.get("datetime") or time_tag.get_text(strip=True)
+        # ---- 增强时间提取 ----
+        pub = extract_time_from_element(a)
+
         candidates.append({
             "title": title,
             "link": full_url,
@@ -160,10 +194,9 @@ def parse_web_generic(html, base_url):
         })
         if len(candidates) >= 200:
             break
-
     return candidates
 
-# ---------- 时间解析 ----------
+# ---------- 时间解析（用于排序） ----------
 def parse_pubdate(date_str):
     if not date_str:
         return None
@@ -175,6 +208,7 @@ def parse_pubdate(date_str):
         r'(\d{4})年(\d{1,2})月(\d{1,2})日',
         r'(\d{4})/(\d{1,2})/(\d{1,2})',
         r'(\d{1,2})月(\d{1,2})日',
+        r'(\d{1,2})-(\d{1,2}) (\d{2}):(\d{2})',  # 08-08 10:30
     ]
     for pat in patterns:
         m = re.match(pat, date_str)
@@ -189,6 +223,14 @@ def parse_pubdate(date_str):
                 elif len(groups) == 5:
                     y, mon, d, h, mi = map(int, groups)
                     return datetime(y, mon, d, h, mi, tzinfo=timezone.utc)
+                elif len(groups) == 4:  # 08-08 10:30
+                    mon, d, h, mi = map(int, groups)
+                    now = datetime.now(timezone.utc)
+                    y = now.year
+                    dt = datetime(y, mon, d, h, mi, tzinfo=timezone.utc)
+                    if dt > now:
+                        dt = datetime(y-1, mon, d, h, mi, tzinfo=timezone.utc)
+                    return dt
                 elif len(groups) == 3:
                     y, mon, d = map(int, groups)
                     return datetime(y, mon, d, tzinfo=timezone.utc)
@@ -236,7 +278,7 @@ def add_news(source_name, title, url, summary, pub_raw, max_limit):
         "title": title,
         "url": url,
         "summary": summary,
-        "pub_raw": pub_raw,   # 保存原始时间字符串
+        "pub_raw": pub_raw,
         "pub_dt": dt
     })
     source_counter[source_name] = source_counter.get(source_name, 0) + 1
@@ -246,7 +288,6 @@ def process_source(source_key, source_cfg):
     name = source_cfg["name_cn"]
     url = source_cfg["url"]
     stype = source_cfg["type"]
-    # 确定该源的最大条数
     max_limit = SPECIAL_MAX.get(source_key, DEFAULT_MAX)
     items = []
     try:
@@ -276,7 +317,7 @@ def process_source(source_key, source_cfg):
 
 # ---------- 生成 HTML（时间显示原文原始字符串） ----------
 def generate_html():
-    bj_now = datetime.now(timezone(timedelta(hours=8)))   # 页面更新时间仍用北京时间
+    bj_now = datetime.now(timezone(timedelta(hours=8)))
     html_content = f"""<!DOCTYPE html>
 <html lang="zh-CN">
 <head>
@@ -342,7 +383,6 @@ body {{ font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Hel
 
 # ---------- 主函数 ----------
 def main():
-    # 以北京时间判断运行时段（6:00~23:00）
     bj_now = datetime.now(timezone(timedelta(hours=8)))
     if not (6 <= bj_now.hour <= 23):
         print(f"⏰ 当前北京时间 {bj_now.strftime('%H:%M')} 不在运行时段 (6:00-23:00)，退出。")
@@ -368,7 +408,7 @@ def main():
                 "title": n["title"],
                 "url": n["url"],
                 "summary": n["summary"],
-                "pub_raw": n["pub_raw"],   # 保留原始时间，前端也可用
+                "pub_raw": n["pub_raw"],
                 "pub_time": n["pub_dt"].strftime('%Y-%m-%d %H:%M:%S') if n["pub_dt"].year > 2000 else "未知时间"
             }
             for n in news_pool
