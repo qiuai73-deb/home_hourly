@@ -1,13 +1,13 @@
 {
-  "update_cst": "2026-08-08 16:18:39 北京时间",
-  "total_count": 34,
+  "update_cst": "2026-08-08 16:28:43 北京时间",
+  "total_count": 37,
   "source_stat": {
     "财新": 5,
     "雪球": 5,
     "同花顺": 10,
     "东财": 5,
     "新浪": 5,
-    "财联": 2,
+    "财联": 5,
     "联合早报": 2
   },
   "news": [
@@ -57,177 +57,6 @@
       "pub_time": "2026-08-08 09:55:17"
     },
     {
-      "source": "联合早报",
-      "title": "中国公布抹黑车企案例引“竹知了”联想 学者：华为维权符官方原则但存“泛侵权化”",
-      "url": "https://www.kuzaobao.com/news/china/202608/0478043.html",
-      "summary": "中国公布抹黑车企案例引“竹知了”联想 学者：华为维权符官方原则但存“泛侵权化”",
-      "pub_raw": "",
-      "pub_beijing": "2026-08-08 16:18:54 北京时间",
-      "pub_time": "2026-08-08 08:18:54"
-    },
-    {
-      "source": "联合早报",
-      "title": "下午察：遥遥领先的华为败给小小“竹知了”？",
-      "url": "https://www.kuzaobao.com/news/china/202608/0478040.html",
-      "summary": "下午察：遥遥领先的华为败给小小“竹知了”？",
-      "pub_raw": "",
-      "pub_beijing": "2026-08-08 16:18:54 北京时间",
-      "pub_time": "2026-08-08 08:18:54"
-    },
-    {
-      "source": "财联",
-      "title": "招金黄金+10.01%",
-      "url": "https://www.cls.cn/stock?code=sz000506",
-      "summary": "招金黄金+10.01%",
-      "pub_raw": "",
-      "pub_beijing": "2026-08-08 16:18:53 北京时间",
-      "pub_time": "2026-08-08 08:18:53"
-    },
-    {
-      "source": "财联",
-      "title": "美股盘前要闻一览：苹果上调多款设备以旧换新回收价格；SK海力士拟投资380亿美元新建两座晶圆厂；美国7月“大非农”数据来袭",
-      "url": "https://www.cls.cn/detail/2448748",
-      "summary": "美股盘前要闻一览：苹果上调多款设备以旧换新回收价格；SK海力士拟投资380亿美元新建两座晶圆厂；美国7月“大非农”数据来袭",
-      "pub_raw": "20:22",
-      "pub_beijing": "2026-08-08 16:18:53 北京时间",
-      "pub_time": "2026-08-08 08:18:53"
-    },
-    {
-      "source": "东财",
-      "title": "美联储鹰风四起！曝沃什为9月加息敞开大门",
-      "url": "https://finance.eastmoney.com/a/202608073834495422.html",
-      "summary": "美联储鹰风四起！曝沃什为9月加息敞开大门",
-      "pub_raw": "",
-      "pub_beijing": "2026-08-08 16:18:47 北京时间",
-      "pub_time": "2026-08-08 08:18:47"
-    },
-    {
-      "source": "东财",
-      "title": "金价重返4300美元后还能走多远",
-      "url": "https://finance.eastmoney.com/a/202608083835609948.html",
-      "summary": "金价重返4300美元后还能走多远",
-      "pub_raw": "",
-      "pub_beijing": "2026-08-08 16:18:47 北京时间",
-      "pub_time": "2026-08-08 08:18:47"
-    },
-    {
-      "source": "东财",
-      "title": "葛卫东加仓存储龙头兆易创新",
-      "url": "https://finance.eastmoney.com/a/202608063834184950.html",
-      "summary": "葛卫东加仓存储龙头兆易创新",
-      "pub_raw": "",
-      "pub_beijing": "2026-08-08 16:18:47 北京时间",
-      "pub_time": "2026-08-08 08:18:47"
-    },
-    {
-      "source": "东财",
-      "title": "纳斯达克综合指数",
-      "url": "http://quote.eastmoney.com/unify/r/100.NDX",
-      "summary": "纳斯达克综合指数",
-      "pub_raw": "",
-      "pub_beijing": "2026-08-08 16:18:47 北京时间",
-      "pub_time": "2026-08-08 08:18:47"
-    },
-    {
-      "source": "东财",
-      "title": "道琼斯指数",
-      "url": "http://quote.eastmoney.com/unify/r/100.DJIA",
-      "summary": "道琼斯指数",
-      "pub_raw": "",
-      "pub_beijing": "2026-08-08 16:18:47 北京时间",
-      "pub_time": "2026-08-08 08:18:47"
-    },
-    {
-      "source": "同花顺",
-      "title": "富达二季度增持亿航智能至449万股 跻身第一大外部股东",
-      "url": "http://stock.10jqka.com.cn/20260808/c678788696.shtml",
-      "summary": "富达二季度增持亿航智能至449万股 跻身第一大外部股东",
-      "pub_raw": "",
-      "pub_beijing": "2026-08-08 16:18:46 北京时间",
-      "pub_time": "2026-08-08 08:18:46"
-    },
-    {
-      "source": "同花顺",
-      "title": "发行市值近610亿元！宇树科技IPO定价150.80元/股！",
-      "url": "https://stock.10jqka.com.cn/20260807/c678739180.shtml",
-      "summary": "发行市值近610亿元！宇树科技IPO定价150.80元/股！",
-      "pub_raw": "",
-      "pub_beijing": "2026-08-08 16:18:46 北京时间",
-      "pub_time": "2026-08-08 08:18:46"
-    },
-    {
-      "source": "同花顺",
-      "title": "磷化铟景气度高涨 3只概念股获机构积极关注（附名单）",
-      "url": "https://field.10jqka.com.cn/20260807/c678740115.shtml",
-      "summary": "磷化铟景气度高涨 3只概念股获机构积极关注（附名单）",
-      "pub_raw": "",
-      "pub_beijing": "2026-08-08 16:18:46 北京时间",
-      "pub_time": "2026-08-08 08:18:46"
-    },
-    {
-      "source": "同花顺",
-      "title": "英伟达拟下调Rubin Ultra显存配置",
-      "url": "https://t.10jqka.com.cn/pid_671987897.shtml",
-      "summary": "英伟达拟下调Rubin Ultra显存配置",
-      "pub_raw": "",
-      "pub_beijing": "2026-08-08 16:18:46 北京时间",
-      "pub_time": "2026-08-08 08:18:46"
-    },
-    {
-      "source": "同花顺",
-      "title": "OpenAI：免费版升级为GPT-5.6 Luna 付费版模型强化",
-      "url": "https://t.10jqka.com.cn/pid_671986798.shtml",
-      "summary": "OpenAI：免费版升级为GPT-5.6 Luna 付费版模型强化",
-      "pub_raw": "",
-      "pub_beijing": "2026-08-08 16:18:46 北京时间",
-      "pub_time": "2026-08-08 08:18:46"
-    },
-    {
-      "source": "同花顺",
-      "title": "ChatGPT时代首次 “科技七巨头”财报引爆超预期波动",
-      "url": "https://t.10jqka.com.cn/pid_671985421.shtml",
-      "summary": "ChatGPT时代首次 “科技七巨头”财报引爆超预期波动",
-      "pub_raw": "",
-      "pub_beijing": "2026-08-08 16:18:46 北京时间",
-      "pub_time": "2026-08-08 08:18:46"
-    },
-    {
-      "source": "同花顺",
-      "title": "短剧行业洗牌加速 AI催生投资新机遇",
-      "url": "https://field.10jqka.com.cn/20260807/c678737742.shtml",
-      "summary": "短剧行业洗牌加速 AI催生投资新机遇",
-      "pub_raw": "",
-      "pub_beijing": "2026-08-08 16:18:46 北京时间",
-      "pub_time": "2026-08-08 08:18:46"
-    },
-    {
-      "source": "同花顺",
-      "title": "证监会行业",
-      "url": "http://q.10jqka.com.cn/stock/zjhhy/",
-      "summary": "证监会行业",
-      "pub_raw": "",
-      "pub_beijing": "2026-08-08 16:18:46 北京时间",
-      "pub_time": "2026-08-08 08:18:46"
-    },
-    {
-      "source": "同花顺",
-      "title": "AI开放平台",
-      "url": "https://aimiai.com/",
-      "summary": "AI开放平台",
-      "pub_raw": "",
-      "pub_beijing": "2026-08-08 16:18:46 北京时间",
-      "pub_time": "2026-08-08 08:18:46"
-    },
-    {
-      "source": "同花顺",
-      "title": "T+0基金",
-      "url": "http://fund.10jqka.com.cn/public/class/emptyfund/emptyfund.html",
-      "summary": "T+0基金",
-      "pub_raw": "",
-      "pub_beijing": "2026-08-08 16:18:46 北京时间",
-      "pub_time": "2026-08-08 08:18:46"
-    },
-    {
       "source": "雪球",
       "title": "AI光互联的新一轮红利，旭日东升",
       "url": "http://xueqiu.com/5672579962/404143277",
@@ -256,45 +85,45 @@
     },
     {
       "source": "新浪",
-      "title": "一纸公告！东兴证券等撤诉，涉资3.72亿",
-      "url": "https://cj.sina.cn/article/norm_detail?url=https%3A%2F%2Ffinance.sina.com.cn%2Fstock%2Fzqgd%2F2026-08-08%2Fdoc-inimqtzt6494617.shtml",
-      "summary": "一纸公告！东兴证券等撤诉，涉资3.72亿",
+      "title": "8月8日外盘头条：伊朗内部辩论霍尔木兹协议措辞 非农爆冷削弱加息预期 SpaceX将自建发电厂保障电力供应",
+      "url": "https://cj.sina.cn/article/norm_detail?url=https%3A%2F%2Ffinance.sina.com.cn%2Fworld%2F2026-08-08%2Fdoc-inimpwwc6752180.shtml",
+      "summary": "8月8日外盘头条：伊朗内部辩论霍尔木兹协议措辞 非农爆冷削弱加息预期 SpaceX将自建发电厂保障电力供应",
       "pub_raw": "8月8日",
       "pub_beijing": "2026-08-08 08:00:00 北京时间",
       "pub_time": "2026-08-08 00:00:00"
     },
     {
       "source": "新浪",
-      "title": "黄金走势即将逆袭？华尔街投行：现在是买入的绝佳时机",
-      "url": "https://cj.sina.cn/article/norm_detail?url=https%3A%2F%2Ffinance.sina.com.cn%2Fjjxw%2F2026-08-08%2Fdoc-inimqtzr9718010.shtml",
-      "summary": "黄金走势即将逆袭？华尔街投行：现在是买入的绝佳时机",
+      "title": "8月8日热门中概股多数上涨 小鹏汽车涨3.72%，慧荣科技跌4.23%",
+      "url": "https://cj.sina.cn/article/norm_detail?url=https%3A%2F%2Ffinance.sina.com.cn%2Fstock%2Fusstock%2Fc%2F2026-08-08%2Fdoc-inimpsqc4552899.shtml",
+      "summary": "8月8日热门中概股多数上涨 小鹏汽车涨3.72%，慧荣科技跌4.23%",
       "pub_raw": "8月8日",
       "pub_beijing": "2026-08-08 08:00:00 北京时间",
       "pub_time": "2026-08-08 00:00:00"
     },
     {
       "source": "新浪",
-      "title": "黄金创今年来最大单周涨幅！金饰克价，重回1300元 黄金股“抢跑”：A股黄金产业链已提前启动",
-      "url": "https://cj.sina.cn/article/norm_detail?url=https%3A%2F%2Ffinance.sina.com.cn%2Froll%2F2026-08-08%2Fdoc-inimqyip4132197.shtml",
-      "summary": "黄金创今年来最大单周涨幅！金饰克价，重回1300元 黄金股“抢跑”：A股黄金产业链已提前启动",
+      "title": "8月8日收盘：标普指数再创新高，三大指数本周均录得较大涨幅",
+      "url": "https://cj.sina.cn/article/norm_detail?url=https%3A%2F%2Ffinance.sina.com.cn%2Fstock%2Fusstock%2Fc%2F2026-08-08%2Fdoc-inimpsqe0060496.shtml",
+      "summary": "8月8日收盘：标普指数再创新高，三大指数本周均录得较大涨幅",
       "pub_raw": "8月8日",
       "pub_beijing": "2026-08-08 08:00:00 北京时间",
       "pub_time": "2026-08-08 00:00:00"
     },
     {
-      "source": "新浪",
-      "title": "吴声爆赞联想AI能力，暗示收到联想赞助",
-      "url": "https://cj.sina.cn/article/norm_detail?url=https%3A%2F%2Ffinance.sina.com.cn%2Fhy%2Fhyjz%2F2026-08-08%2Fdoc-inimqtzp2633778.shtml",
-      "summary": "吴声爆赞联想AI能力，暗示收到联想赞助",
+      "source": "财联",
+      "title": "财联社8月8日电，根据美国证券交易委员会（SEC）披露文件，alphabet提交文件申请发行最高额度250亿美元的分系列中期票据。",
+      "url": "https://www.cls.cn/detail/2448968",
+      "summary": "财联社8月8日电，根据美国证券交易委员会（SEC）披露文件，alphabet提交文件申请发行最高额度250亿美元的分系列中期票据。",
       "pub_raw": "8月8日",
       "pub_beijing": "2026-08-08 08:00:00 北京时间",
       "pub_time": "2026-08-08 00:00:00"
     },
     {
-      "source": "新浪",
-      "title": "吴声：AI模仿越多，汪峰的稀缺性则越大",
-      "url": "https://cj.sina.cn/article/norm_detail?url=https%3A%2F%2Ffinance.sina.com.cn%2Fhy%2Fhyjz%2F2026-08-08%2Fdoc-inimqtzt6482874.shtml",
-      "summary": "吴声：AI模仿越多，汪峰的稀缺性则越大",
+      "source": "财联",
+      "title": "【金饰克价重返1300元】财联社8月8日电，国内黄金饰品价格对比显示，国内多家品牌足金饰品价格重返1300元，其中周生生足金饰品报1315元/克，周大福报价1308元/克，老庙黄金报价1310元/克。",
+      "url": "https://www.cls.cn/detail/2449068",
+      "summary": "【金饰克价重返1300元】财联社8月8日电，国内黄金饰品价格对比显示，国内多家品牌足金饰品价格重返1300元，其中周生生足金饰品报1315元/克，周大福报价1308元/克，老庙黄金报价1310元/克。",
       "pub_raw": "8月8日",
       "pub_beijing": "2026-08-08 08:00:00 北京时间",
       "pub_time": "2026-08-08 00:00:00"
@@ -316,6 +145,204 @@
       "pub_raw": "Fri, 07 Aug 2026 10:05:05 GMT",
       "pub_beijing": "2026-08-07 18:05:05 北京时间",
       "pub_time": "2026-08-07 10:05:05"
+    },
+    {
+      "source": "同花顺",
+      "title": "T+0基金",
+      "url": "http://fund.10jqka.com.cn/public/class/emptyfund/emptyfund.html",
+      "summary": "T+0基金",
+      "pub_raw": "",
+      "pub_beijing": "未知时间",
+      "pub_time": "未知时间"
+    },
+    {
+      "source": "同花顺",
+      "title": "AI开放平台",
+      "url": "https://aimiai.com/",
+      "summary": "AI开放平台",
+      "pub_raw": "",
+      "pub_beijing": "未知时间",
+      "pub_time": "未知时间"
+    },
+    {
+      "source": "同花顺",
+      "title": "证监会行业",
+      "url": "http://q.10jqka.com.cn/stock/zjhhy/",
+      "summary": "证监会行业",
+      "pub_raw": "",
+      "pub_beijing": "未知时间",
+      "pub_time": "未知时间"
+    },
+    {
+      "source": "同花顺",
+      "title": "短剧行业洗牌加速 AI催生投资新机遇",
+      "url": "https://field.10jqka.com.cn/20260807/c678737742.shtml",
+      "summary": "短剧行业洗牌加速 AI催生投资新机遇",
+      "pub_raw": "",
+      "pub_beijing": "未知时间",
+      "pub_time": "未知时间"
+    },
+    {
+      "source": "同花顺",
+      "title": "ChatGPT时代首次 “科技七巨头”财报引爆超预期波动",
+      "url": "https://t.10jqka.com.cn/pid_671985421.shtml",
+      "summary": "ChatGPT时代首次 “科技七巨头”财报引爆超预期波动",
+      "pub_raw": "",
+      "pub_beijing": "未知时间",
+      "pub_time": "未知时间"
+    },
+    {
+      "source": "同花顺",
+      "title": "OpenAI：免费版升级为GPT-5.6 Luna 付费版模型强化",
+      "url": "https://t.10jqka.com.cn/pid_671986798.shtml",
+      "summary": "OpenAI：免费版升级为GPT-5.6 Luna 付费版模型强化",
+      "pub_raw": "",
+      "pub_beijing": "未知时间",
+      "pub_time": "未知时间"
+    },
+    {
+      "source": "同花顺",
+      "title": "英伟达拟下调Rubin Ultra显存配置",
+      "url": "https://t.10jqka.com.cn/pid_671987897.shtml",
+      "summary": "英伟达拟下调Rubin Ultra显存配置",
+      "pub_raw": "",
+      "pub_beijing": "未知时间",
+      "pub_time": "未知时间"
+    },
+    {
+      "source": "同花顺",
+      "title": "磷化铟景气度高涨 3只概念股获机构积极关注（附名单）",
+      "url": "https://field.10jqka.com.cn/20260807/c678740115.shtml",
+      "summary": "磷化铟景气度高涨 3只概念股获机构积极关注（附名单）",
+      "pub_raw": "",
+      "pub_beijing": "未知时间",
+      "pub_time": "未知时间"
+    },
+    {
+      "source": "同花顺",
+      "title": "发行市值近610亿元！宇树科技IPO定价150.80元/股！",
+      "url": "https://stock.10jqka.com.cn/20260807/c678739180.shtml",
+      "summary": "发行市值近610亿元！宇树科技IPO定价150.80元/股！",
+      "pub_raw": "",
+      "pub_beijing": "未知时间",
+      "pub_time": "未知时间"
+    },
+    {
+      "source": "同花顺",
+      "title": "富达二季度增持亿航智能至449万股 跻身第一大外部股东",
+      "url": "http://stock.10jqka.com.cn/20260808/c678788696.shtml",
+      "summary": "富达二季度增持亿航智能至449万股 跻身第一大外部股东",
+      "pub_raw": "",
+      "pub_beijing": "未知时间",
+      "pub_time": "未知时间"
+    },
+    {
+      "source": "东财",
+      "title": "道琼斯指数",
+      "url": "http://quote.eastmoney.com/unify/r/100.DJIA",
+      "summary": "道琼斯指数",
+      "pub_raw": "",
+      "pub_beijing": "未知时间",
+      "pub_time": "未知时间"
+    },
+    {
+      "source": "东财",
+      "title": "纳斯达克综合指数",
+      "url": "http://quote.eastmoney.com/unify/r/100.NDX",
+      "summary": "纳斯达克综合指数",
+      "pub_raw": "",
+      "pub_beijing": "未知时间",
+      "pub_time": "未知时间"
+    },
+    {
+      "source": "东财",
+      "title": "葛卫东加仓存储龙头兆易创新",
+      "url": "https://finance.eastmoney.com/a/202608063834184950.html",
+      "summary": "葛卫东加仓存储龙头兆易创新",
+      "pub_raw": "",
+      "pub_beijing": "未知时间",
+      "pub_time": "未知时间"
+    },
+    {
+      "source": "东财",
+      "title": "金价重返4300美元后还能走多远",
+      "url": "https://finance.eastmoney.com/a/202608083835609948.html",
+      "summary": "金价重返4300美元后还能走多远",
+      "pub_raw": "",
+      "pub_beijing": "未知时间",
+      "pub_time": "未知时间"
+    },
+    {
+      "source": "东财",
+      "title": "美联储鹰风四起！曝沃什为9月加息敞开大门",
+      "url": "https://finance.eastmoney.com/a/202608073834495422.html",
+      "summary": "美联储鹰风四起！曝沃什为9月加息敞开大门",
+      "pub_raw": "",
+      "pub_beijing": "未知时间",
+      "pub_time": "未知时间"
+    },
+    {
+      "source": "新浪",
+      "title": "标普500",
+      "url": "http://finance.sina.com.cn/stock/usstock/US100_INX.shtml",
+      "summary": "标普500",
+      "pub_raw": "",
+      "pub_beijing": "未知时间",
+      "pub_time": "未知时间"
+    },
+    {
+      "source": "新浪",
+      "title": "CBOT黄金",
+      "url": "http://finance.sina.com.cn/money/future/GC/quote.shtml",
+      "summary": "CBOT黄金",
+      "pub_raw": "",
+      "pub_beijing": "未知时间",
+      "pub_time": "未知时间"
+    },
+    {
+      "source": "财联",
+      "title": "美股盘前要闻一览：苹果上调多款设备以旧换新回收价格；SK海力士拟投资380亿美元新建两座晶圆厂；美国7月“大非农”数据来袭",
+      "url": "https://www.cls.cn/detail/2448748",
+      "summary": "美股盘前要闻一览：苹果上调多款设备以旧换新回收价格；SK海力士拟投资380亿美元新建两座晶圆厂；美国7月“大非农”数据来袭",
+      "pub_raw": "",
+      "pub_beijing": "未知时间",
+      "pub_time": "未知时间"
+    },
+    {
+      "source": "财联",
+      "title": "多家A股公司：收到美国关税退税",
+      "url": "https://www.cls.cn/detail/2449086",
+      "summary": "多家A股公司：收到美国关税退税",
+      "pub_raw": "",
+      "pub_beijing": "未知时间",
+      "pub_time": "未知时间"
+    },
+    {
+      "source": "财联",
+      "title": "特朗普宣布：将向关键矿产和电池项目投资30亿美元",
+      "url": "https://www.cls.cn/detail/2449039",
+      "summary": "特朗普宣布：将向关键矿产和电池项目投资30亿美元",
+      "pub_raw": "",
+      "pub_beijing": "未知时间",
+      "pub_time": "未知时间"
+    },
+    {
+      "source": "联合早报",
+      "title": "下午察：遥遥领先的华为败给小小“竹知了”？",
+      "url": "https://www.kuzaobao.com/news/china/202608/0478040.html",
+      "summary": "下午察：遥遥领先的华为败给小小“竹知了”？",
+      "pub_raw": "",
+      "pub_beijing": "未知时间",
+      "pub_time": "未知时间"
+    },
+    {
+      "source": "联合早报",
+      "title": "中国公布抹黑车企案例引“竹知了”联想 学者：华为维权符官方原则但存“泛侵权化”",
+      "url": "https://www.kuzaobao.com/news/china/202608/0478043.html",
+      "summary": "中国公布抹黑车企案例引“竹知了”联想 学者：华为维权符官方原则但存“泛侵权化”",
+      "pub_raw": "",
+      "pub_beijing": "未知时间",
+      "pub_time": "未知时间"
     }
   ]
 }
