@@ -1,9 +1,13 @@
 {
-  "update_cst": "2026-08-08 09:47:15 北京时间",
-  "total_count": 28,
+  "update_cst": "2026-08-08 10:05:45 北京时间",
+  "total_count": 71,
   "source_stat": {
     "财新": 13,
-    "雪球": 15
+    "雪球": 15,
+    "同花顺": 11,
+    "凤凰网": 15,
+    "新浪": 15,
+    "联合早报": 2
   },
   "news": [
     {
@@ -40,6 +44,307 @@
       "url": "https://china.caixin.com/2026-08-08/102472447.html",
       "summary": "　　【财新网】近日，中国人大网公布2026年第四号全国人大常委会公报。其中首次公布，6月26日，在十四届全国人大常委会第二十三次会议上，被终止十四届全国人大代表资格的李兰祥、侯建国，分别涉嫌严重违纪违法、涉嫌重大责任事故罪。　　李兰祥此前担任山东省泰安市长，2026年2月辞去该职；侯建国此前担任贵州盘江精煤股份有限公司山脚树矿矿长。两人分别是被责令辞去、被罢免十四届全国人大代表职务。　　",
       "pub_time": "2026-08-08 16:06:24"
+    },
+    {
+      "source": "联合早报",
+      "title": "中国公布抹黑车企案例引“竹知了”联想 学者：华为维权符官方原则但存“泛侵权化”",
+      "url": "https://www.kuzaobao.com/news/china/202608/0478043.html",
+      "summary": "中国公布抹黑车企案例引“竹知了”联想 学者：华为维权符官方原则但存“泛侵权化”",
+      "pub_time": "2026-08-08 10:05:57"
+    },
+    {
+      "source": "联合早报",
+      "title": "下午察：遥遥领先的华为败给小小“竹知了”？",
+      "url": "https://www.kuzaobao.com/news/china/202608/0478040.html",
+      "summary": "下午察：遥遥领先的华为败给小小“竹知了”？",
+      "pub_time": "2026-08-08 10:05:57"
+    },
+    {
+      "source": "新浪",
+      "title": "IPO“带病闯关”休想“一撤了之”",
+      "url": "https://finance.sina.com.cn/jjxw/2026-08-08/doc-inimpspz2899783.shtml",
+      "summary": "IPO“带病闯关”休想“一撤了之”",
+      "pub_time": "2026-08-08 10:05:55"
+    },
+    {
+      "source": "新浪",
+      "title": "[财经早报]",
+      "url": "https://finance.sina.com.cn/stock/y/2026-08-07/doc-inimmyet0064102.shtml",
+      "summary": "[财经早报]",
+      "pub_time": "2026-08-08 10:05:55"
+    },
+    {
+      "source": "新浪",
+      "title": "创指半日涨1.75% 创新药板块掀涨停潮",
+      "url": "https://finance.sina.com.cn/zt_d/subject-1786063872/",
+      "summary": "创指半日涨1.75% 创新药板块掀涨停潮",
+      "pub_time": "2026-08-08 10:05:55"
+    },
+    {
+      "source": "新浪",
+      "title": "中国金茂进入业绩兑现期？持续投资迎来收获 开发业务毛利率大幅提升",
+      "url": "http://finance.sina.com.cn/research/baijiu007/yw/2025-04-01/doc-inerrnxs6345481.shtml",
+      "summary": "中国金茂进入业绩兑现期？持续投资迎来收获 开发业务毛利率大幅提升",
+      "pub_time": "2026-08-08 10:05:55"
+    },
+    {
+      "source": "新浪",
+      "title": "华南城将被清盘！第三大股东腾讯23亿投资打水漂",
+      "url": "http://finance.sina.com.cn/research/dichan007/yw/2025-08-12/doc-infktfvz8814540.shtml",
+      "summary": "华南城将被清盘！第三大股东腾讯23亿投资打水漂",
+      "pub_time": "2026-08-08 10:05:55"
+    },
+    {
+      "source": "新浪",
+      "title": "“药”爆了！华宝基金医疗ETF、创新药ETF集体涨超4.5%！PCB点燃电子板块，光模块龙头尾盘却跳水，咋回事？",
+      "url": "https://finance.sina.com.cn/money/fund/etf/2026-08-07/doc-inimnzsm4678531.shtml",
+      "summary": "“药”爆了！华宝基金医疗ETF、创新药ETF集体涨超4.5%！PCB点燃电子板块，光模块龙头尾盘却跳水，咋回事？",
+      "pub_time": "2026-08-08 10:05:55"
+    },
+    {
+      "source": "新浪",
+      "title": "业绩兑现，创新药全链沸腾！AH近20股涨超10%，药明康德H股新高，华宝基金港股通医疗ETF放量涨5.51%！",
+      "url": "https://finance.sina.com.cn/money/fund/etf/2026-08-07/doc-inimnzse9886836.shtml",
+      "summary": "业绩兑现，创新药全链沸腾！AH近20股涨超10%，药明康德H股新高，华宝基金港股通医疗ETF放量涨5.51%！",
+      "pub_time": "2026-08-08 10:05:55"
+    },
+    {
+      "source": "新浪",
+      "title": "马斯克点名存储供不应求，2027将迎“最严峻时期”？费率较低的科创芯片ETF华宝（589190）再涨3%连涨4日！",
+      "url": "https://finance.sina.com.cn/money/fund/etf/2026-08-07/doc-inimnzsc3114931.shtml",
+      "summary": "马斯克点名存储供不应求，2027将迎“最严峻时期”？费率较低的科创芯片ETF华宝（589190）再涨3%连涨4日！",
+      "pub_time": "2026-08-08 10:05:55"
+    },
+    {
+      "source": "新浪",
+      "title": "公募机构提示跨境ETF高溢价风险",
+      "url": "https://finance.sina.com.cn/jjxw/2026-08-08/doc-inimpwvz9981168.shtml",
+      "summary": "公募机构提示跨境ETF高溢价风险",
+      "pub_time": "2026-08-08 10:05:55"
+    },
+    {
+      "source": "新浪",
+      "title": "ETF专区",
+      "url": "https://finance.sina.com.cn/fund/etf/index.shtml",
+      "summary": "ETF专区",
+      "pub_time": "2026-08-08 10:05:55"
+    },
+    {
+      "source": "新浪",
+      "title": "黄金ETF",
+      "url": "http://stock.finance.sina.com.cn/futures/view/vGoldEtf.php",
+      "summary": "黄金ETF",
+      "pub_time": "2026-08-08 10:05:55"
+    },
+    {
+      "source": "新浪",
+      "title": "中国概念股",
+      "url": "http://finance.sina.com.cn/stock/usstock/cnlist.html",
+      "summary": "中国概念股",
+      "pub_time": "2026-08-08 10:05:55"
+    },
+    {
+      "source": "新浪",
+      "title": "财经大V频道",
+      "url": "http://finance.sina.com.cn/dav/",
+      "summary": "财经大V频道",
+      "pub_time": "2026-08-08 10:05:55"
+    },
+    {
+      "source": "新浪",
+      "title": "聚焦2026基金二季报",
+      "url": "https://finance.sina.com.cn/zt_d/jjjjejb2026",
+      "summary": "聚焦2026基金二季报",
+      "pub_time": "2026-08-08 10:05:55"
+    },
+    {
+      "source": "新浪",
+      "title": "新浪财经全球资本峰会",
+      "url": "https://finance.sina.com.cn/zt_d/subject-1783394329/",
+      "summary": "新浪财经全球资本峰会",
+      "pub_time": "2026-08-08 10:05:55"
+    },
+    {
+      "source": "凤凰网",
+      "title": "金价强势反弹，黄金市场大变化",
+      "url": "https://finance.ifeng.com/c/8vP7ShydogU",
+      "summary": "金价强势反弹，黄金市场大变化",
+      "pub_time": "2026-08-08 10:05:53"
+    },
+    {
+      "source": "凤凰网",
+      "title": "利润大涨超100%，这一行业，黄金窗口期来了",
+      "url": "https://finance.ifeng.com/c/8vPjHNQCq8y",
+      "summary": "利润大涨超100%，这一行业，黄金窗口期来了",
+      "pub_time": "2026-08-08 10:05:53"
+    },
+    {
+      "source": "凤凰网",
+      "title": "特朗普将与矿企高管开会",
+      "url": "https://finance.ifeng.com/c/8vOrlC56BpH",
+      "summary": "特朗普将与矿企高管开会",
+      "pub_time": "2026-08-08 10:05:53"
+    },
+    {
+      "source": "凤凰网",
+      "title": "深夜金价拉升，美就业数据远低于预期，加息或生变",
+      "url": "https://finance.ifeng.com/c/8vP912rVykd",
+      "summary": "深夜金价拉升，美就业数据远低于预期，加息或生变",
+      "pub_time": "2026-08-08 10:05:53"
+    },
+    {
+      "source": "凤凰网",
+      "title": "美联储独立性再迎挑战，特朗普重启解雇理事库克行动",
+      "url": "https://finance.ifeng.com/c/8vPN6XVtIfB",
+      "summary": "美联储独立性再迎挑战，特朗普重启解雇理事库克行动",
+      "pub_time": "2026-08-08 10:05:53"
+    },
+    {
+      "source": "凤凰网",
+      "title": "贝莱德大佬解读非农转负，放言“如今加息已经没有太大意义”",
+      "url": "https://finance.ifeng.com/c/8vPPxJ6cBUk",
+      "summary": "贝莱德大佬解读非农转负，放言“如今加息已经没有太大意义”",
+      "pub_time": "2026-08-08 10:05:53"
+    },
+    {
+      "source": "凤凰网",
+      "title": "AI低俗广告，闪了300亿“中国锅王”的腰",
+      "url": "https://finance.ifeng.com/c/8vPlPGLmR8P",
+      "summary": "AI低俗广告，闪了300亿“中国锅王”的腰",
+      "pub_time": "2026-08-08 10:05:53"
+    },
+    {
+      "source": "凤凰网",
+      "title": "黄金半年低迷后强势反弹，瑞银、法巴齐看多金价冲击5000美元",
+      "url": "https://finance.ifeng.com/c/8vP9nBQHvpP",
+      "summary": "黄金半年低迷后强势反弹，瑞银、法巴齐看多金价冲击5000美元",
+      "pub_time": "2026-08-08 10:05:53"
+    },
+    {
+      "source": "凤凰网",
+      "title": "宇树科技IPO倒计时，下周一启动申购！受益股曝光",
+      "url": "https://finance.ifeng.com/c/8vPoGKwD3pn",
+      "summary": "宇树科技IPO倒计时，下周一启动申购！受益股曝光",
+      "pub_time": "2026-08-08 10:05:53"
+    },
+    {
+      "source": "凤凰网",
+      "title": "孙玉胜：AI时代媒体更要捍卫新闻“现场主权”",
+      "url": "https://news.ifeng.com/c/8rze5uy3ptt",
+      "summary": "孙玉胜：AI时代媒体更要捍卫新闻“现场主权”",
+      "pub_time": "2026-08-08 10:05:53"
+    },
+    {
+      "source": "凤凰网",
+      "title": "贴耳大吼、扇巴掌？新生儿入住月子会所4天，突发颅内出血进ICU",
+      "url": "https://news.ifeng.com/c/8vPLZq2vJw1",
+      "summary": "贴耳大吼、扇巴掌？新生儿入住月子会所4天，突发颅内出血进ICU",
+      "pub_time": "2026-08-08 10:05:53"
+    },
+    {
+      "source": "凤凰网",
+      "title": "特朗普：隔着大洋呢，我们没掺和这事",
+      "url": "https://news.ifeng.com/c/8vPrynBVxqj",
+      "summary": "特朗普：隔着大洋呢，我们没掺和这事",
+      "pub_time": "2026-08-08 10:05:53"
+    },
+    {
+      "source": "凤凰网",
+      "title": "万斯为何能被特朗普青睐？背后有好几个大佬做靠山",
+      "url": "https://v.ifeng.com/c/8vPA0XjV5pT",
+      "summary": "万斯为何能被特朗普青睐？背后有好几个大佬做靠山",
+      "pub_time": "2026-08-08 10:05:53"
+    },
+    {
+      "source": "凤凰网",
+      "title": "中期选举临近，特朗普连续21场败诉",
+      "url": "https://news.ifeng.com/c/8vP8prEgTBk",
+      "summary": "中期选举临近，特朗普连续21场败诉",
+      "pub_time": "2026-08-08 10:05:53"
+    },
+    {
+      "source": "凤凰网",
+      "title": "涉及白宫宴会厅项目，特朗普称将提起上诉",
+      "url": "https://news.ifeng.com/c/8vPP6fsrHNx",
+      "summary": "涉及白宫宴会厅项目，特朗普称将提起上诉",
+      "pub_time": "2026-08-08 10:05:53"
+    },
+    {
+      "source": "同花顺",
+      "title": "创新药概念股霸屏，业绩预喜股来了数据宝昨天 12:19",
+      "url": "https://t.10jqka.com.cn/pid_672232041.shtml",
+      "summary": "创新药概念股霸屏，业绩预喜股来了数据宝昨天 12:19",
+      "pub_time": "2026-08-08 10:05:52"
+    },
+    {
+      "source": "同花顺",
+      "title": "9分钟，强势封板！股市“吹哨人”，突然改口！市场风向变了？存储芯片强势反攻！券商中国昨天 12:08",
+      "url": "https://t.10jqka.com.cn/pid_672227355.shtml",
+      "summary": "9分钟，强势封板！股市“吹哨人”，突然改口！市场风向变了？存储芯片强势反攻！券商中国昨天 12:08",
+      "pub_time": "2026-08-08 10:05:52"
+    },
+    {
+      "source": "同花顺",
+      "title": "中际旭创午后大跳水！发生了什么？中国基金报昨天 15:17",
+      "url": "https://news.10jqka.com.cn/20260807/c678758665.shtml",
+      "summary": "中际旭创午后大跳水！发生了什么？中国基金报昨天 15:17",
+      "pub_time": "2026-08-08 10:05:52"
+    },
+    {
+      "source": "同花顺",
+      "title": "中国7月出口同比增23.9%，半导体出口按价值计算同比近乎翻番外贸延续增长态势！华尔街见闻昨天 11:58",
+      "url": "https://t.10jqka.com.cn/pid_672224031.shtml",
+      "summary": "中国7月出口同比增23.9%，半导体出口按价值计算同比近乎翻番外贸延续增长态势！华尔街见闻昨天 11:58",
+      "pub_time": "2026-08-08 10:05:52"
+    },
+    {
+      "source": "同花顺",
+      "title": "马斯克力挺存储需求！SpaceX、特斯拉联合打造芯片“帝国”，剑指1太瓦算力自主供应财闻昨天 15:00",
+      "url": "https://news.10jqka.com.cn/20260807/c678758300.shtml",
+      "summary": "马斯克力挺存储需求！SpaceX、特斯拉联合打造芯片“帝国”，剑指1太瓦算力自主供应财闻昨天 15:00",
+      "pub_time": "2026-08-08 10:05:52"
+    },
+    {
+      "source": "同花顺",
+      "title": "宇树科技IPO路演现场，王兴兴最新发声！谈及上市、具身智能行业发展“具身智能第一股”即将登场经济参考报昨天 14:59",
+      "url": "https://news.10jqka.com.cn/20260807/c678758290.shtml",
+      "summary": "宇树科技IPO路演现场，王兴兴最新发声！谈及上市、具身智能行业发展“具身智能第一股”即将登场经济参考报昨天 14:59",
+      "pub_time": "2026-08-08 10:05:52"
+    },
+    {
+      "source": "同花顺",
+      "title": "盘后！存储芯片利好来了！计划斥资54万亿韩元扩建芯片制造设施中国基金报昨天 16:22",
+      "url": "https://news.10jqka.com.cn/20260807/c678762719.shtml",
+      "summary": "盘后！存储芯片利好来了！计划斥资54万亿韩元扩建芯片制造设施中国基金报昨天 16:22",
+      "pub_time": "2026-08-08 10:05:52"
+    },
+    {
+      "source": "同花顺",
+      "title": "六大龙头释放利好！昔日“黄金赛道”集体飙涨！重估来了？医药股爆发！券商中国昨天 15:58",
+      "url": "https://t.10jqka.com.cn/pid_672573006.shtml",
+      "summary": "六大龙头释放利好！昔日“黄金赛道”集体飙涨！重估来了？医药股爆发！券商中国昨天 15:58",
+      "pub_time": "2026-08-08 10:05:52"
+    },
+    {
+      "source": "同花顺",
+      "title": "特朗普将与多位矿企巨头高管开会，以补充武器库存财闻昨天 18:31",
+      "url": "https://news.10jqka.com.cn/20260807/c678767274.shtml",
+      "summary": "特朗普将与多位矿企巨头高管开会，以补充武器库存财闻昨天 18:31",
+      "pub_time": "2026-08-08 10:05:52"
+    },
+    {
+      "source": "同花顺",
+      "title": "加息突变！特朗普最新表态，美股、金银价格飙涨！期货日报昨天 21:40",
+      "url": "https://news.10jqka.com.cn/20260807/c678773225.shtml",
+      "summary": "加息突变！特朗普最新表态，美股、金银价格飙涨！期货日报昨天 21:40",
+      "pub_time": "2026-08-08 10:05:52"
+    },
+    {
+      "source": "同花顺",
+      "title": "国产AI芯片“一哥”寒武纪业绩大增！知名牛散、北向资金加仓中国证券报昨天 22:23",
+      "url": "https://news.10jqka.com.cn/20260807/c678773645.shtml",
+      "summary": "国产AI芯片“一哥”寒武纪业绩大增！知名牛散、北向资金加仓中国证券报昨天 22:23",
+      "pub_time": "2026-08-08 10:05:52"
     },
     {
       "source": "财新",
