@@ -2,7 +2,7 @@
 """
 国内多源新闻聚合爬虫（稳健版）
 - 每个源默认 5 条，同花顺 10 条
-- 时间显示 UTC 原始时间（不加 8 小时）
+- 时间显示原文原始字符串（不加转换）
 - 关键词过滤
 - 生成 index.html 和 news.json
 - 仅在 6:00~23:00（北京时间）执行
@@ -236,7 +236,7 @@ def add_news(source_name, title, url, summary, pub_raw, max_limit):
         "title": title,
         "url": url,
         "summary": summary,
-        "pub_raw": pub_raw,
+        "pub_raw": pub_raw,   # 保存原始时间字符串
         "pub_dt": dt
     })
     source_counter[source_name] = source_counter.get(source_name, 0) + 1
@@ -274,9 +274,9 @@ def process_source(source_key, source_cfg):
             break
     print(f"✅ {name} 过滤后保留 {count} 条 (上限 {max_limit})")
 
-# ---------- 生成 HTML（时间显示 UTC，不加 8 小时） ----------
+# ---------- 生成 HTML（时间显示原文原始字符串） ----------
 def generate_html():
-    bj_now = datetime.now(timezone.utc)   # 显示 UTC 时间
+    bj_now = datetime.now(timezone(timedelta(hours=8)))   # 页面更新时间仍用北京时间
     html_content = f"""<!DOCTYPE html>
 <html lang="zh-CN">
 <head>
@@ -309,7 +309,7 @@ body {{ font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Hel
 <div class="container">
     <div class="header">
         <h1>📰 国内新闻聚合</h1>
-        <div class="info">更新: {bj_now.strftime('%Y-%m-%d %H:%M:%S')} UTC · 共 {len(news_pool)} 条</div>
+        <div class="info">更新: {bj_now.strftime('%Y-%m-%d %H:%M:%S')} 北京时间 · 共 {len(news_pool)} 条</div>
     </div>
     <div class="news-list">
 """
@@ -319,19 +319,15 @@ body {{ font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Hel
         for item in news_pool:
             title = html.escape(item["title"]) if item["title"] else "（无标题）"
             summary = html.escape(item["summary"])[:200] if item["summary"] else ""
-            # 直接显示 UTC 时间（不 +8）
-            dt = item["pub_dt"]
-            if dt.year < 2000:
-                time_str = "未知时间"
-            else:
-                time_str = dt.strftime('%Y-%m-%d %H:%M')
+            # 直接显示原文原始时间字符串
+            pub_display = item["pub_raw"] if item["pub_raw"] else "未知时间"
             html_content += f"""
         <div class="news-item">
             <div class="title"><a href="{item["url"]}" target="_blank">{title}</a></div>
             <div class="summary">{summary}…</div>
             <div class="meta">
                 <span class="source">{item["source"]}</span>
-                <span>🕒 {time_str} UTC</span>
+                <span>🕒 {pub_display}</span>
             </div>
         </div>
 """
@@ -346,7 +342,7 @@ body {{ font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Hel
 
 # ---------- 主函数 ----------
 def main():
-    # 仍以北京时间判断运行时段（6:00~23:00）
+    # 以北京时间判断运行时段（6:00~23:00）
     bj_now = datetime.now(timezone(timedelta(hours=8)))
     if not (6 <= bj_now.hour <= 23):
         print(f"⏰ 当前北京时间 {bj_now.strftime('%H:%M')} 不在运行时段 (6:00-23:00)，退出。")
@@ -372,6 +368,7 @@ def main():
                 "title": n["title"],
                 "url": n["url"],
                 "summary": n["summary"],
+                "pub_raw": n["pub_raw"],   # 保留原始时间，前端也可用
                 "pub_time": n["pub_dt"].strftime('%Y-%m-%d %H:%M:%S') if n["pub_dt"].year > 2000 else "未知时间"
             }
             for n in news_pool
