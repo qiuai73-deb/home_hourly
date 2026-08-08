@@ -303,7 +303,7 @@ def main():
         name = cfg["name_cn"]
         url = cfg["url"]
         stype = cfg["type"]
-        max_limit = SPECIAL_MAX.get(key, DEFAULT_MAX)
+        max_limit = 5
         items = []
         try:
             if stype == "rss":
