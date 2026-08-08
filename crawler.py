@@ -1,422 +1,1164 @@
 #!/usr/bin/env python3
 """
-国内新闻聚合爬虫｜修复网页时间错乱 + json.dump参数报错
-- RSS源时间100%准确，网页无时间标记统一显示未知
-- 关键词财经过滤
-- 自动生成news.json + index.html静态页面
-- 仅北京时间6:00~23:00运行
+国内多源新闻聚合爬虫（增强发布时间版）
+
+功能：
+- RSS + Web 多源抓取
+- 自动进入新闻详情页补抓发布时间
+- 按北京时间排序
+- 首页显示最新15条
+- 标题后显示发布时间
+- 输出 index.html 和 news.json
 """
+
 import ssl
 import json
 import time
 import re
-import xml.etree.ElementTree as ET
-from datetime import datetime, timedelta, timezone
 import html
 import urllib.request
-import urllib.parse
+from datetime import datetime, timedelta, timezone
 from urllib.parse import urljoin
+
 import requests
 from bs4 import BeautifulSoup
 
-# ---------- 基础配置 ----------
-DEFAULT_MAX = 5              # 普通媒体单源上限
-SPECIAL_MAX = {"ths": 10}    # 同花顺单独上限10条
-CUTOFF_DAYS = 7              # 只保留7天内新闻
-USER_AGENT = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) Chrome/120.0.0 Safari/537.36"
 
-# ---------- 财经科技关键词过滤 ----------
+# =========================
+# 配置
+# =========================
+
+DEFAULT_MAX = 10
+
+# 每个来源最多抓取数量
+SPECIAL_MAX = {
+    "ths": 20,
+    "eastmoney": 20,
+    "sina": 20
+}
+
+# 最终网页显示数量
+FINAL_LIMIT = 15
+
+# 保存最近几天新闻
+CUTOFF_DAYS = 7
+
+
+USER_AGENT = (
+    "Mozilla/5.0 (Windows NT 10.0; Win64; x64) "
+    "AppleWebKit/537.36 Chrome/120 Safari/537.36"
+)
+
+
+# =========================
+# 关键词过滤
+# =========================
+
 KEYWORDS = [
-    "GDP", "降息", "加息", "LPR", "央行", "美元", "人民币", "金融", "消费", "券商","证券",
-    "地产", "财经", "突发", "重大","独家", "黄金","CPI","路透","彭博","周期",
-    "A股", "指数", "创业", "科创", "基金", "ETF", "回购", "增持", "IPO","资金","利率",
-    "纳斯达克", "证监会", "私募", "公募", "标普", "龙头", "指数","涨停","概念","利空",
-    "AI", "大模型", "芯片", "半导体", "华为", "鸿蒙", "新能源", "苹果",
-    "科技", "deepseek", "比亚迪", "小米", "大疆", "字节", "腾讯", "阿里","知情人士",
-    "微信", "英伟达", "谷歌", "抖音", "kimi", "豆包","年报","龙头",
-    "银行", "高盛", "利润", "统计局", "大摩", "小摩", "汇率"
+    "GDP","降息","加息","LPR","央行","美元","人民币",
+    "金融","消费","券商","证券","地产","财经",
+    "突发","重大","独家","黄金","CPI",
+    "A股","指数","创业","科创","基金","ETF",
+    "IPO","资金","利率","纳斯达克",
+    "证监会","私募","公募",
+    "AI","大模型","芯片","半导体",
+    "华为","鸿蒙","新能源",
+    "苹果","科技","deepseek",
+    "比亚迪","小米","腾讯","阿里",
+    "银行","高盛","利润","统计局",
+    "汇率"
 ]
-KEYWORD_PATTERN = re.compile('|'.join(KEYWORDS), re.IGNORECASE)
-def is_relevant(text: str) -> bool:
-    """标题/摘要命中关键词才保留"""
+
+
+KEYWORD_PATTERN = re.compile(
+    "|".join(KEYWORDS),
+    re.IGNORECASE
+)
+
+
+def is_relevant(text):
     return bool(KEYWORD_PATTERN.search(text))
 
-# ---------- 新闻源配置 ----------
+
+# =========================
+# 新闻源
+# =========================
+
 SOURCES = {
+
     "caixin": {
         "name_cn": "财新",
         "url": "https://quanwenrss.com/caixin",
         "type": "rss"
     },
+
+
     "snowball": {
         "name_cn": "雪球",
         "url": "https://xueqiu.com/hots/topic/rss",
         "type": "rss"
     },
+
+
     "ths": {
         "name_cn": "同花顺",
         "url": "https://www.10jqka.com.cn/classic",
         "type": "web"
     },
+
+
     "eastmoney": {
         "name_cn": "东方财富",
-        "url": "https://finance.eastmoney.com/a/cywjh.html",
+        "url": "https://finance.eastmoney.com/",
         "type": "web"
     },
+
+
     "sina": {
         "name_cn": "新浪财经",
-        "url": "https://finance.sina.com.cn/roll/#pageid=384&lid=2671&k=&num=50&page=1",
+        "url": "https://finance.sina.com.cn/",
         "type": "web"
     },
+
+
     "cls": {
         "name_cn": "财联社",
-        "url": "https://www.cls.cn",
-        "type": "web"
-    },
-    "zaobao": {
-        "name_cn": "联合早报",
-        "url": "https://www.kuzaobao.com/plus/list.php?tid=1",
+        "url": "https://www.cls.cn/",
         "type": "web"
     }
+
 }
 
-# ---------- RSS专用请求（urllib） ----------
+
+# =========================
+# 网络请求
+# =========================
+
+def fetch_web(url, timeout=15):
+
+    headers = {
+        "User-Agent": USER_AGENT
+    }
+
+    try:
+
+        r = requests.get(
+            url,
+            headers=headers,
+            timeout=timeout
+        )
+
+        r.encoding = r.apparent_encoding
+
+        return r.text
+
+    except Exception:
+
+        return ""
+
+
+
 def fetch_rss(url, timeout=15):
+
     ctx = ssl.create_default_context()
+
     ctx.check_hostname = False
     ctx.verify_mode = ssl.CERT_NONE
-    req = urllib.request.Request(url, headers={"User-Agent": USER_AGENT})
-    with urllib.request.urlopen(req, timeout=timeout, context=ctx) as resp:
-        return resp.read().decode("utf-8", "replace")
 
-# ---------- 网页请求（requests + bs4解析） ----------
-def fetch_web(url, timeout=15):
-    headers = {"User-Agent": USER_AGENT}
-    resp = requests.get(url, headers=headers, timeout=timeout)
-    resp.encoding = resp.apparent_encoding or 'utf-8'
-    return resp.text
 
-# ---------- RSS XML解析 ----------
-def parse_rss(xml_text):
+    req = urllib.request.Request(
+        url,
+        headers={
+            "User-Agent": USER_AGENT
+        }
+    )
+
+
+    with urllib.request.urlopen(
+        req,
+        timeout=timeout,
+        context=ctx
+    ) as resp:
+
+        return resp.read().decode(
+            "utf-8",
+            "ignore"
+        )
+
+
+
+# =========================
+# RSS解析
+# =========================
+
+def parse_rss(xml):
+
+    import xml.etree.ElementTree as ET
+
     results = []
+
+
     try:
-        root = ET.fromstring(xml_text)
-    except ET.ParseError:
+
+        root = ET.fromstring(xml)
+
+    except:
+
         return results
-    # 标准RSS item
+
+
+
     for item in root.findall(".//item"):
-        title = re.sub(r"<.+?>", "", item.findtext("title", "").strip())
-        link = item.findtext("link", "").strip()
-        summary = re.sub(r"<.+?>", "", item.findtext("description", "")[:300])
-        pub = item.findtext("pubDate", "")
+
+
+        title = item.findtext(
+            "title",
+            ""
+        ).strip()
+
+
+        link = item.findtext(
+            "link",
+            ""
+        ).strip()
+
+
+        summary = item.findtext(
+            "description",
+            ""
+        )
+
+
+        pub = item.findtext(
+            "pubDate",
+            ""
+        )
+
+
         if title and link:
-            results.append({"title": title, "link": link, "summary": summary, "pub": pub})
-    # Atom兼容
-    ns = "{http://www.w3.org/2005/Atom}"
-    for entry in root.findall(ns + "entry"):
-        title = re.sub(r"<.+?>", "", entry.findtext(ns + "title", "").strip())
-        link = ""
-        for ln in entry.findall(ns + "link"):
-            link = ln.get("href", "")
-        summary = re.sub(r"<.+?>", "", entry.findtext(ns + "summary", "")[:300])
-        pub = entry.findtext(ns + "published") or entry.findtext(ns + "updated", "")
-        if title and link:
-            results.append({"title": title, "link": link, "summary": summary, "pub": pub})
+
+            results.append({
+
+                "title": title,
+
+                "link": link,
+
+                "summary": BeautifulSoup(
+                    summary,
+                    "html.parser"
+                ).text[:300],
+
+                "pub": pub
+
+            })
+
+
     return results
 
-# ---------- 【修复版】网页时间提取函数（向上遍历20层父节点，扩充匹配规则） ----------
-def extract_time_from_element(element):
-    all_parents = []
-    current = element
-    # 向上遍历20层，扩大查找范围
-    for _ in range(20):
-        if current is None:
-            break
-        all_parents.append(current)
-        current = current.parent
-    # 逐层扫描时间信息
-    for parent in all_parents:
-        # 优先读取datetime属性
-        dt_attr = parent.get("datetime")
-        if dt_attr and len(dt_attr) > 6:
-            return dt_attr
-        # 遍历页面内时间标签
-        for tag in parent.find_all(["time", "span", "div", "p", "em", "i"]):
-            cls_text = " ".join(tag.get("class", [])).lower()
-            time_keywords = ["time","date","pub","publish","发布","时间","日期","2024","2025","2026"]
-            if any(k in cls_text for k in time_keywords):
-                tag_text = tag.get_text(strip=True)
-                if re.search(r"\d{4}|\d{1,2}月|\d{1,2}日|\d{1,2}:\d{2}", tag_text):
-                    return tag_text
-        # 全文正则匹配完整日期
-        full_text = parent.get_text(" ", strip=True)
-        time_reg = re.search(r"\d{4}[-/]?\d{1,2}[-/]?\d{1,2}\s?\d{0,2}:\d{0,2}", full_text)
-        if time_reg:
-            return time_reg.group()
+
+
+# =========================
+# 时间提取
+# =========================
+
+TIME_PATTERNS = [
+
+    r"\d{4}-\d{1,2}-\d{1,2}\s\d{1,2}:\d{2}",
+
+    r"\d{4}/\d{1,2}/\d{1,2}\s\d{1,2}:\d{2}",
+
+    r"\d{4}年\d{1,2}月\d{1,2}日\s\d{1,2}:\d{2}",
+
+    r"\d{1,2}月\d{1,2}日\s\d{1,2}:\d{2}",
+
+    r"\d{1,2}:\d{2}"
+
+]
+
+
+
+def extract_time(text):
+
+    if not text:
+
+        return ""
+
+
+    for p in TIME_PATTERNS:
+
+        m = re.search(
+            p,
+            text
+        )
+
+        if m:
+
+            return m.group()
+
+
     return ""
 
-# ---------- 通用网页列表解析 ----------
-def parse_web_generic(html, base_url):
-    soup = BeautifulSoup(html, "html.parser")
-    candidates = []
-    seen_urls = set()
-    invalid_keywords = ["关于我们", "版权声明", "隐私政策", "登录", "注册", "首页", "下载App", "更多", "快讯", "实时"]
-    # 提取根域名用于补全残缺链接
-    from urllib.parse import urlparse
-    parse_base = urlparse(base_url)
-    base_domain = f"{parse_base.scheme}://{parse_base.netloc}"
 
-    for a in soup.find_all("a", href=True):
-        title = a.get_text(strip=True)
-        raw_href = a.get("href", "").strip()
-        if not raw_href or raw_href.startswith('#') or raw_href.startswith('javascript:'):
-            continue
-        # 分情况补全链接
-        if raw_href.startswith("http"):
-            full_url = raw_href
-        elif raw_href.startswith("/"):
-            full_url = base_domain + raw_href
-        else:
-            full_url = urljoin(base_url, raw_href)
 
-        if full_url.strip('/') == base_url.strip('/'):
+def extract_time_from_element(element):
+
+    """
+    从新闻列表附近提取时间
+    """
+
+    for parent in (
+        [element]
+        +
+        list(element.parents)[:5]
+    ):
+
+
+        text = parent.get_text(
+            " ",
+            strip=True
+        )
+
+
+        result = extract_time(text)
+
+
+        if result:
+
+            return result
+
+
+    return ""
+
+
+
+# =========================
+# 详情页时间补抓
+# =========================
+
+def fetch_detail_time(url):
+
+    """
+    访问新闻详情页
+    提取发布时间
+    """
+
+    try:
+
+        page = fetch_web(url)
+
+        if not page:
+
+            return ""
+
+
+        soup = BeautifulSoup(
+            page,
+            "html.parser"
+        )
+
+
+        # 优先查找time标签
+
+        for t in soup.find_all("time"):
+
+            if t.text.strip():
+
+                return t.text.strip()
+
+
+
+        # 全文搜索
+
+        text = soup.get_text(
+            " ",
+            strip=True
+        )
+
+
+        return extract_time(text)
+
+
+
+    except Exception:
+
+        return ""
+# =========================
+# Web列表页解析
+# =========================
+
+def parse_web_generic(page, base_url):
+
+    soup = BeautifulSoup(
+        page,
+        "html.parser"
+    )
+
+    results = []
+
+    seen = set()
+
+
+    for a in soup.find_all(
+        "a",
+        href=True
+    ):
+
+        title = a.get_text(
+            strip=True
+        )
+
+        href = a["href"]
+
+
+        if not title:
             continue
-        if len(title) < 5 or len(title) > 100:
+
+
+        if len(title) < 6 or len(title) > 100:
             continue
-        if any(k in title for k in invalid_keywords):
+
+
+        url = urljoin(
+            base_url,
+            href
+        )
+
+
+        if url in seen:
             continue
-        if full_url in seen_urls:
+
+
+        # 排除无关链接
+
+        bad_words = [
+            "首页",
+            "登录",
+            "注册",
+            "下载",
+            "关于",
+            "客服",
+            "广告"
+        ]
+
+
+        if any(
+            x in title
+            for x in bad_words
+        ):
             continue
-        seen_urls.add(full_url)
-        pub_time = extract_time_from_element(a)
-        candidates.append({
+
+
+
+        seen.add(url)
+
+
+        # 列表页尝试获取时间
+
+        pub = extract_time_from_element(a)
+
+
+
+        results.append({
+
             "title": title,
-            "link": full_url,
-            "summary": title,
-            "pub": pub_time
-        })
-        if len(candidates) >= 200:
-            break
-    return candidates
 
-# ---------- 【修复版】时间解析函数（无年份不自动填充今年，避免时间错乱） ----------
-def parse_pubdate(date_str):
-    if not date_str:
+            "link": url,
+
+            "summary": title,
+
+            "pub": pub
+
+        })
+
+
+        if len(results) >= 100:
+
+            break
+
+
+
+    return results
+
+
+
+# =========================
+# 时间标准化
+# =========================
+
+def parse_pubdate(text):
+
+    if not text:
+
         return None
-    date_str = date_str.strip()
+
+
+    text = text.strip()
+
+
+
     patterns = [
-        (r'\w{3}, (\d{1,2}) (\w{3}) (\d{4}) (\d{2}):(\d{2}):(\d{2})', 6),
-        (r'(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2})', 5),
-        (r'(\d{4})-(\d{2})-(\d{2}) (\d{2}):(\d{2})', 5),
-        (r'(\d{4})年(\d{1,2})月(\d{1,2})日 (\d{1,2}):(\d{2})', 5),
-        (r'(\d{4})/(\d{1,2})/(\d{1,2}) (\d{1,2}):(\d{2})', 5),
-        (r'(\d{4})年(\d{1,2})月(\d{1,2})', 3),
-        (r'(\d{4})-(\d{1,2})-(\d{2})', 3),
+
+        (
+            r"(\d{4})-(\d{1,2})-(\d{1,2})\s(\d{1,2}):(\d{2})",
+            "%Y-%m-%d %H:%M"
+        ),
+
+        (
+            r"(\d{4})/(\d{1,2})/(\d{1,2})\s(\d{1,2}):(\d{2})",
+            "%Y/%m/%d %H:%M"
+        )
+
     ]
-    for pat, group_len in patterns:
-        m = re.match(pat, date_str)
-        if not m:
-            continue
-        groups = m.groups()
-        try:
-            if group_len == 6:
-                month_map = {"Jan":1,"Feb":2,"Mar":3,"Apr":4,"May":5,"Jun":6,"Jul":7,"Aug":8,"Sep":9,"Oct":10,"Nov":11,"Dec":12}
-                d, mon, y, h, mi, s = groups
-                return datetime(int(y), month_map[mon], int(d), int(h), int(mi), int(s), tzinfo=timezone.utc)
-            elif group_len >= 3:
-                y, mon, d = int(groups[0]), int(groups[1]), int(groups[2])
-                h = int(groups[3]) if len(groups)>=4 else 0
-                mi = int(groups[4]) if len(groups)>=5 else 0
-                return datetime(y, mon, d, h, mi, tzinfo=timezone.utc)
-        except Exception:
-            continue
-    # 只有月日时分，缺少年份直接返回None
+
+
+
+    for pattern, fmt in patterns:
+
+
+        m = re.search(
+            pattern,
+            text
+        )
+
+
+        if m:
+
+            try:
+
+                dt = datetime.strptime(
+                    m.group(),
+                    fmt
+                )
+
+
+                return dt.replace(
+                    tzinfo=timezone.utc
+                )
+
+
+            except:
+
+                pass
+
+
+
+    # 只有时间
+
+    m = re.search(
+        r"(\d{1,2}):(\d{2})",
+        text
+    )
+
+
+    if m:
+
+
+        now = datetime.now(
+            timezone.utc
+        )
+
+
+        return datetime(
+            now.year,
+            now.month,
+            now.day,
+            int(m.group(1)),
+            int(m.group(2)),
+            tzinfo=timezone.utc
+        )
+
+
+
     return None
 
-# ---------- 全局存储容器 ----------
+
+
+
+# =========================
+# 新闻池
+# =========================
+
 news_pool = []
+
 source_counter = {}
 
-# ---------- 入库函数（修复无时间填充当前时间BUG） ----------
-def add_news(source_name, title, url, summary, pub_raw, max_limit):
+
+
+def add_news(
+        source,
+        title,
+        url,
+        summary,
+        pub,
+        max_limit
+):
+
+
     if not title:
+
         return False
-    # 关键词过滤
-    if not is_relevant(title + " " + summary):
+
+
+
+    if not is_relevant(
+        title + summary
+    ):
+
         return False
-    # 单源条数上限
-    if source_counter.get(source_name, 0) >= max_limit:
+
+
+
+    if source_counter.get(
+        source,
+        0
+    ) >= max_limit:
+
         return False
-    # 解析发布时间
-    dt = parse_pubdate(pub_raw)
-    # 有时间才校验7天时效，无时间不丢弃
-    if dt is not None and datetime.now(timezone.utc) - dt > timedelta(days=CUTOFF_DAYS):
+
+
+
+    dt = parse_pubdate(pub)
+
+
+
+    # 如果没有时间，尝试详情页
+
+    if dt is None:
+
+
+        detail_time = fetch_detail_time(url)
+
+
+        dt = parse_pubdate(
+            detail_time
+        )
+
+
+
+    # 没时间排最后
+
+    if dt is None:
+
+        dt = datetime(
+            2000,
+            1,
+            1,
+            tzinfo=timezone.utc
+        )
+
+
+
+    # 过滤旧新闻
+
+    if (
+        datetime.now(timezone.utc)
+        -
+        dt
+    ).days > CUTOFF_DAYS:
+
         return False
-    # 链接/标题去重
-    for item in news_pool:
-        if item["url"] == url or item["title"] == title:
+
+
+
+    # 去重
+
+    for n in news_pool:
+
+
+        if n["url"] == url:
+
             return False
-    # 格式化北京时间展示文本
-    if dt:
-        bj_dt = dt + timedelta(hours=8)
-        pub_beijing = bj_dt.strftime('%Y-%m-%d %H:%M:%S 北京时间')
-    else:
-        pub_beijing = "未知发布时间"
+
+
+        if n["title"] == title:
+
+            return False
+
+
+
+
+    bj = (
+        dt
+        +
+        timedelta(hours=8)
+    )
+
+
     news_pool.append({
-        "source": source_name,
+
+        "source": source,
+
         "title": title,
+
         "url": url,
+
         "summary": summary,
-        "pub_raw": pub_raw,
+
         "pub_dt": dt,
-        "pub_beijing": pub_beijing
+
+        "pub_beijing":
+            bj.strftime(
+                "%Y-%m-%d %H:%M"
+            )
+
     })
-    source_counter[source_name] = source_counter.get(source_name, 0) + 1
+
+
+
+    source_counter[source] = (
+        source_counter.get(
+            source,
+            0
+        )
+        +
+        1
+    )
+
+
     return True
 
-# ---------- 单个媒体抓取逻辑 ----------
-def process_source(source_key, source_cfg):
-    name = source_cfg["name_cn"]
-    url = source_cfg["url"]
-    stype = source_cfg["type"]
-    max_limit = SPECIAL_MAX.get(source_key, DEFAULT_MAX)
+
+
+
+# =========================
+# 单个来源处理
+# =========================
+
+def process_source(
+        key,
+        cfg
+):
+
+
+    name = cfg["name_cn"]
+
+
+    limit = SPECIAL_MAX.get(
+        key,
+        DEFAULT_MAX
+    )
+
+
     items = []
+
+
+
     try:
-        if stype == "rss":
-            xml = fetch_rss(url)
-            items = parse_rss(xml)
-        elif stype == "web":
-            html = fetch_web(url)
-            items = parse_web_generic(html, url)
-        else:
-            print(f"未知源类型：{stype}，跳过 {name}")
-            return
+
+
+        if cfg["type"] == "rss":
+
+
+            xml = fetch_rss(
+                cfg["url"]
+            )
+
+
+            items = parse_rss(
+                xml
+            )
+
+
+
+        elif cfg["type"] == "web":
+
+
+            page = fetch_web(
+                cfg["url"]
+            )
+
+
+            items = parse_web_generic(
+                page,
+                cfg["url"]
+            )
+
+
+
     except Exception as e:
-        print(f"❌ 抓取 {name} 失败: {e}")
+
+
+        print(
+            "抓取失败:",
+            name,
+            e
+        )
+
+
         return
-    print(f"📌 {name} 原始抓取 {len(items)} 条")
-    # 按时间倒序预处理
-    items.sort(key=lambda x: parse_pubdate(x["pub"]) or datetime.min.replace(tzinfo=timezone.utc), reverse=True)
+
+
+
+
+    # 先排序
+
+    items.sort(
+
+        key=lambda x:
+        parse_pubdate(
+            x.get("pub","")
+        )
+        or datetime(
+            2000,
+            1,
+            1,
+            tzinfo=timezone.utc
+        ),
+
+        reverse=True
+
+    )
+
+
+
     count = 0
-    for it in items:
-        if add_news(name, it["title"], it["link"], it["summary"], it["pub"], max_limit):
+
+
+    for item in items:
+
+
+        if add_news(
+
+            name,
+
+            item["title"],
+
+            item["link"],
+
+            item.get(
+                "summary",
+                ""
+            ),
+
+            item.get(
+                "pub",
+                ""
+            ),
+
+            limit
+
+        ):
+
             count += 1
-        if count >= max_limit:
+
+
+
+        if count >= limit:
+
             break
-    print(f"✅ {name} 过滤后保留 {count} 条 (上限 {max_limit})")
 
-# ---------- 生成前端 index.html ----------
+
+
+    print(
+        name,
+        "完成",
+        count
+    )
+
+
+
+# =========================
+# HTML生成
+# =========================
+
 def generate_html():
-    bj_now = datetime.now(timezone(timedelta(hours=8)))
-    html_content = f"""<!DOCTYPE html>
-<html lang="zh-CN">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>📰 国内财经新闻聚合</title>
-<style>
-* {{ margin:0; padding:0; box-sizing:border-box; }}
-body {{ font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif; background: #f5f7fa; padding:20px; color:#333; }}
-.container {{ max-width:1200px; margin:0 auto; }}
-.header {{ background: #1e3c72; color: white; padding:20px 30px; border-radius:12px; margin-bottom:25px; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; }}
-.header h1 {{ font-weight:400; font-size:24px; }}
-.header .info {{ font-size:14px; opacity:0.9; }}
-.news-list {{ display:grid; gap:16px; }}
-.news-item {{ background:white; border-radius:10px; padding:18px 22px; box-shadow:0 2px 8px rgba(0,0,0.06); transition:0.2s; border-left:4px solid #1e3c72; }}
-.news-item:hover {{ box-shadow:0 4px 16px rgba(0,0,0.10); }}
-.news-item .title {{ font-size:18px; font-weight:500; line-height:1.5; margin-bottom:6px; }}
-.news-item .title a {{ color:#1e3c72; text-decoration:none; }}
-.news-item .title a:hover {{ text-decoration:underline; }}
-.news-item .meta {{ font-size:14px; color:#888; display:flex; flex-wrap:wrap; gap:15px; margin-top:8px; }}
-.news-item .meta .source {{ background:#eef2f7; padding:2px 12px; border-radius:20px; color:#1e3c72; }}
-.news-item .summary {{ color:#666; font-size:15; margin-top:8px; line-height:1.6; }}
-@media (max-width:600px) {{
-    .header {{ flex-direction:column; align-items:flex-start; gap:10px; }}
-    .news-item .title {{ font-size:16px; }}
-}}
-</style>
-</head>
-<body>
-<div class="container">
-    <div class="header">
-        <h1>📰 国内财经新闻聚合</h1>
-        <div class="info">更新: {bj_now.strftime('%Y-%m-%d %H:%M:%S')} · 共 {len(news_pool)} 条</div>
-    </div>
-    <div class="news-list">
-"""
-    if not news_pool:
-        html_content += "<p style='text-align:center;color:#999;padding:40px;font-size:16px;'>暂无匹配财经新闻，请等待下一轮抓取</p>"
-    else:
-        for item in news_pool:
-            title = html.escape(item["title"])
-            summary = html.escape(item["summary"])[:200]
-            pub_display = item["pub_beijing"]
-            html_content += f"""
-        <div class="news-item">
-            <div class="title"><a href="{item["url"]}" target="_blank">{title}</a></div>
-            <div class="summary">{summary}…</div>
-            <div class="meta">
-                <span class="source">{item["source"]}</span>
-                <span>🕒 {pub_display}</span>
-            </div>
-        </div>
-"""
-    html_content += """
-    </div>
-</div>
-</body>
-</html>
-"""
-    with open("index.html", "w", encoding="utf-8") as f:
-        f.write(html_content)
 
-# ---------- 主程序入口 ----------
+
+    now = datetime.now(
+        timezone(
+            timedelta(hours=8)
+        )
+    )
+
+
+
+    html_content = f"""
+<!DOCTYPE html>
+<html>
+<head>
+
+<meta charset="utf-8">
+
+<title>财经新闻聚合</title>
+
+
+<style>
+
+body {{
+
+font-family:
+Arial,
+"Microsoft YaHei";
+
+background:#f5f5f5;
+
+padding:20px;
+
+}}
+
+
+.container {{
+
+max-width:1200px;
+
+margin:auto;
+
+}}
+
+
+.news {{
+
+background:white;
+
+padding:18px;
+
+margin-bottom:15px;
+
+border-radius:10px;
+
+}}
+
+
+.title {{
+
+font-size:18px;
+
+font-weight:bold;
+
+}}
+
+
+.title a {{
+
+text-decoration:none;
+
+color:#1a4d8f;
+
+}}
+
+
+.time {{
+
+color:#999;
+
+font-size:13px;
+
+}}
+
+
+.source {{
+
+color:#666;
+
+font-size:14px;
+
+margin-top:8px;
+
+}}
+
+</style>
+
+
+</head>
+
+
+<body>
+
+
+<div class="container">
+
+
+<h2>
+📰 财经新闻
+</h2>
+
+
+<p>
+更新时间:
+{now.strftime("%Y-%m-%d %H:%M")}
+北京时间
+</p>
+
+"""
+
+
+    for n in news_pool:
+
+
+        short_time = (
+            n["pub_beijing"]
+            [-5:]
+        )
+
+
+        html_content += f"""
+
+<div class="news">
+
+
+<div class="title">
+
+<a href="{n['url']}" target="_blank">
+
+{html.escape(n['title'])}
+
+<span class="time">
+
+🕒 {short_time}
+
+</span>
+
+</a>
+
+</div>
+
+
+<div class="source">
+
+{n['source']}
+
+</div>
+
+
+</div>
+
+
+"""
+
+
+
+    html_content += """
+
+</div>
+
+</body>
+
+</html>
+
+"""
+
+
+
+    with open(
+        "index.html",
+        "w",
+        encoding="utf-8"
+    ) as f:
+
+
+        f.write(
+            html_content
+        )
+
+
+
+# =========================
+# 主程序
+# =========================
+
 def main():
-    bj_now = datetime.now(timezone(timedelta(hours=8)))
-    # 仅北京时间6-23点运行
-    if not (6 <= bj_now.hour <= 23):
-        print(f"⏰ 当前北京时间 {bj_now.hour}:{bj_now.minute}，不在6:00-23:00运行时段，直接退出")
-        return
+
+
     global news_pool, source_counter
+
+
     news_pool = []
+
     source_counter = {}
-    # 遍历所有媒体
-    for key, cfg in SOURCES.items():
-        process_source(key, cfg)
-        time.sleep(0.5)
-    # 全局按发布时间倒序
-    news_pool.sort(key=lambda x: x["pub_dt"] or datetime.min.replace(tzinfo=timezone.utc), reverse=True)
-    # 组装输出JSON
-    output = {
-        "update_cst": bj_now.strftime("%Y-%m-%d %H:%M:%S 北京时间"),
-        "total_count": len(news_pool),
-        "source_stat": source_counter,
-        "news": [
-            {
-                "source": n["source"],
-                "title": n["title"],
-                "url": n["url"],
-                "summary": n["summary"],
-                "pub_raw": n["pub_raw"],
-                "pub_beijing": n["pub_beijing"],
-                "pub_time": n["pub_dt"].strftime('%Y-%m-%d %H:%M:%S') if n["pub_dt"] else "未知时间"
-            }
-            for n in news_pool
-        ]
+
+
+
+    for key,cfg in SOURCES.items():
+
+
+        process_source(
+            key,
+            cfg
+        )
+
+
+        time.sleep(1)
+
+
+
+    # 按发布时间排序
+
+    news_pool.sort(
+
+        key=lambda x:
+        x["pub_dt"],
+
+        reverse=True
+
+    )
+
+
+
+    # 只保留最新15条
+
+    news_pool = news_pool[:FINAL_LIMIT]
+
+
+
+    data = {
+
+
+        "update":
+
+        datetime.now(
+            timezone(
+                timedelta(hours=8)
+            )
+        ).strftime(
+            "%Y-%m-%d %H:%M"
+        ),
+
+
+        "count":
+
+        len(news_pool),
+
+
+
+        "news":
+
+        news_pool
+
     }
-    # 修复json.dump 缺少fp参数BUG
-    with open("news.json", "w", encoding="utf-8") as f:
-        json.dump(output, f, ensure_ascii=False, indent=2)
-    # 生成网页
+
+
+
+    with open(
+        "news.json",
+        "w",
+        encoding="utf-8"
+    ) as f:
+
+
+        json.dump(
+            data,
+            f,
+            ensure_ascii=False,
+            indent=2,
+            default=str
+        )
+
+
+
     generate_html()
-    print(f"\n🎉 全部抓取完成，有效财经新闻共 {len(news_pool)} 条")
+
+
+
+    print(
+        "完成，共",
+        len(news_pool),
+        "条"
+    )
+
+
+
 
 if __name__ == "__main__":
-    try:
-        main()
-    except Exception as e:
-        print(f"❌ 程序全局异常: {str(e)}")
-        err_data = {"error": str(e)}
-        # 修复异常分支dump参数缺失
-        with open("news.json", "w", encoding="utf-8") as f:
-            json.dump(err_data, f, ensure_ascii=False, indent=2)
+
+
+    main()
