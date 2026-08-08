@@ -1,4 +1,4 @@
-name: Auto Crawl Foreign China News
+name: Home News
 # 定时：北京时间6:00-23:00每小时整点；同时支持手动触发
 on:
   workflow_dispatch: # 这一行绝对不能删、不能缩进错
