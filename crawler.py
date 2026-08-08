@@ -1,11 +1,10 @@
 #!/usr/bin/env python3
 """
-国内多源新闻聚合爬虫（高效稳定版）
-- 简化时间提取，优先常见标签，若无则使用当前日期
-- 增加超时控制，避免卡死
-- 每个源最多 5 条（同花顺 10 条）
-- 统一显示北京时间
-- 仅在 6:00~23:00（北京时间）执行
+国内多源新闻聚合爬虫（含历史管理与最新新闻标记）
+- 保留历史新闻，定期清理3天前旧闻
+- 顶部“最新新闻”仅显示本次新抓取的条目（按时间倒序）
+- 每个源默认5条，同花顺10条
+- 统一北京时间显示
 """
 
 import ssl
@@ -18,7 +17,7 @@ import html
 import urllib.request
 import urllib.parse
 from urllib.parse import urljoin
-import sys
+from pathlib import Path
 
 import requests
 from bs4 import BeautifulSoup
@@ -26,10 +25,10 @@ from bs4 import BeautifulSoup
 # ---------- 配置 ----------
 DEFAULT_MAX = 5
 SPECIAL_MAX = {"ths": 10}
-CUTOFF_DAYS = 7
+CUTOFF_DAYS = 3               # 只保留最近3天新闻
 USER_AGENT = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) Chrome/120.0.0.0 Safari/537.36"
-REQUEST_TIMEOUT = 10          # 每个网页请求超时（秒）
-SOURCE_TIMEOUT = 20           # 每个源总耗时超时（秒）
+REQUEST_TIMEOUT = 10
+NEWS_JSON_FILE = "news.json"
 
 # ---------- 关键词 ----------
 KEYWORDS = [
@@ -86,7 +85,7 @@ SOURCES = {
     }
 }
 
-# ---------- 网络请求（带超时） ----------
+# ---------- 网络请求 ----------
 def fetch_rss(url, timeout=REQUEST_TIMEOUT):
     ctx = ssl.create_default_context()
     ctx.check_hostname = False
@@ -127,17 +126,11 @@ def parse_rss(xml_text):
             results.append({"title": title, "link": link, "summary": summary, "pub": pub})
     return results
 
-# ---------- 简化时间提取（高效） ----------
+# ---------- 简化时间提取 ----------
 def extract_time_from_element(element):
-    """
-    从元素及其附近提取时间（简化版）
-    优先查找 <time> 或 class 包含 time/date 的 span
-    """
-    # 1. 检查元素自身或父级（最多往上2层）的 time 标签
     for parent in [element] + list(element.parents)[:3]:
         if parent is None:
             continue
-        # 查找 time 标签
         for tag in parent.find_all(['time']):
             dt = tag.get('datetime')
             if dt:
@@ -145,16 +138,13 @@ def extract_time_from_element(element):
             text = tag.get_text(strip=True)
             if text:
                 return text
-        # 查找 span/div 中 class 含 time/date 的
         for tag in parent.find_all(['span', 'div']):
             class_str = ' '.join(tag.get('class', []))
             if any(k in class_str.lower() for k in ['time', 'date', 'pub', 'publish']):
                 text = tag.get_text(strip=True)
                 if text:
                     return text
-    # 2. 如果都没找到，尝试从当前元素的文本中提取日期模式（简单匹配）
     text = element.get_text(separator=' ', strip=True)
-    # 匹配常见日期格式
     patterns = [
         r'\d{4}-\d{1,2}-\d{1,2} \d{1,2}:\d{2}',
         r'\d{4}/\d{1,2}/\d{1,2} \d{1,2}:\d{2}',
@@ -191,10 +181,7 @@ def parse_web_generic(html, base_url):
         if full_url in seen_urls:
             continue
         seen_urls.add(full_url)
-
-        # 提取时间
         pub = extract_time_from_element(a)
-
         candidates.append({
             "title": title,
             "link": full_url,
@@ -205,20 +192,19 @@ def parse_web_generic(html, base_url):
             break
     return candidates
 
-# ---------- 时间解析（支持常见格式） ----------
+# ---------- 时间解析 ----------
 def parse_pubdate(date_str):
     if not date_str:
         return None
     date_str = date_str.strip()
-    # 只匹配常见格式，减少正则开销
     patterns = [
-        r'\w{3}, (\d{1,2}) (\w{3}) (\d{4}) (\d{2}):(\d{2}):(\d{2})',  # RSS
-        r'(\d{4})-(\d{2})-(\d{2}) (\d{2}):(\d{2})',                   # 标准
-        r'(\d{4})年(\d{1,2})月(\d{1,2})日 (\d{1,2}):(\d{2})',         # 中文完整
-        r'(\d{1,2})月(\d{1,2})日 (\d{1,2}):(\d{2})',                  # 月日 时:分
-        r'(\d{4})-(\d{2})-(\d{2})',                                   # 日期
-        r'(\d{4})年(\d{1,2})月(\d{1,2})日',                           # 中文日期
-        r'(\d{1,2})月(\d{1,2})日',                                    # 月日
+        r'\w{3}, (\d{1,2}) (\w{3}) (\d{4}) (\d{2}):(\d{2}):(\d{2})',
+        r'(\d{4})-(\d{2})-(\d{2}) (\d{2}):(\d{2})',
+        r'(\d{4})年(\d{1,2})月(\d{1,2})日 (\d{1,2}):(\d{2})',
+        r'(\d{1,2})月(\d{1,2})日 (\d{1,2}):(\d{2})',
+        r'(\d{4})-(\d{2})-(\d{2})',
+        r'(\d{4})年(\d{1,2})月(\d{1,2})日',
+        r'(\d{1,2})月(\d{1,2})日',
     ]
     for pat in patterns:
         m = re.match(pat, date_str)
@@ -233,7 +219,7 @@ def parse_pubdate(date_str):
                 elif len(groups) == 5:
                     y, mon, d, h, mi = map(int, groups)
                     return datetime(y, mon, d, h, mi, tzinfo=timezone.utc)
-                elif len(groups) == 4:  # 月日 时:分
+                elif len(groups) == 4:
                     mon, d, h, mi = map(int, groups)
                     now = datetime.now(timezone.utc)
                     y = now.year
@@ -256,87 +242,184 @@ def parse_pubdate(date_str):
                 continue
     return None
 
-# ---------- 全局存储 ----------
-news_pool = []
-source_counter = {}
+# ---------- 历史新闻管理 ----------
+def load_history():
+    """读取历史新闻文件"""
+    if Path(NEWS_JSON_FILE).exists():
+        try:
+            with open(NEWS_JSON_FILE, "r", encoding="utf-8") as f:
+                data = json.load(f)
+                if isinstance(data, dict) and "news" in data:
+                    return data["news"]
+        except:
+            pass
+    return []
 
-def add_news(source_name, title, url, summary, pub_raw, max_limit):
-    if not title:
-        return False
-    if not is_relevant(title + " " + summary):
-        return False
-    if source_counter.get(source_name, 0) >= max_limit:
-        return False
-    dt = parse_pubdate(pub_raw)
-    if dt is None:
-        # 如果无法解析时间，使用当前时间（但会排在后面，因为可能有真正的时间）
-        dt = datetime.now(timezone.utc)
-        # 但为了不让所有未知时间的新闻都排在前面，我们给一个很旧的日期（如1970年）
-        # 这样它们会排在最后，便于真正有时间的新鲜新闻排在前面
-        dt = datetime(1970, 1, 1, tzinfo=timezone.utc)
-    if datetime.now(timezone.utc) - dt > timedelta(days=CUTOFF_DAYS) and dt.year > 2000:
-        # 如果新闻太旧，只丢弃那些确实有时间且过期的
-        return False
-    # 对于1970年的占位时间，我们不过滤
-    for item in news_pool:
-        if item["url"] == url or item["title"] == title:
-            return False
+def save_news(news_list, update_time, source_stat):
+    """保存完整新闻数据"""
+    output = {
+        "update_cst": update_time,
+        "total_count": len(news_list),
+        "source_stat": source_stat,
+        "news": news_list
+    }
+    with open(NEWS_JSON_FILE, "w", encoding="utf-8") as f:
+        json.dump(output, f, ensure_ascii=False, indent=2)
 
-    # 计算北京时间（如果是1970年，则显示“未知时间”）
-    if dt.year > 2000:
-        bj_dt = dt + timedelta(hours=8)
-        pub_beijing = bj_dt.strftime('%Y-%m-%d %H:%M:%S 北京时间')
-    else:
-        pub_beijing = "未知时间"
-
-    news_pool.append({
-        "source": source_name,
-        "title": title,
-        "url": url,
-        "summary": summary,
-        "pub_raw": pub_raw,
-        "pub_dt": dt,
-        "pub_beijing": pub_beijing
-    })
-    source_counter[source_name] = source_counter.get(source_name, 0) + 1
-    return True
-
-def process_source(source_key, source_cfg):
-    name = source_cfg["name_cn"]
-    url = source_cfg["url"]
-    stype = source_cfg["type"]
-    max_limit = SPECIAL_MAX.get(source_key, DEFAULT_MAX)
-    items = []
-    start_time = time.time()
-    try:
-        if stype == "rss":
-            xml = fetch_rss(url)
-            items = parse_rss(xml)
-        elif stype == "web":
-            html = fetch_web(url)
-            items = parse_web_generic(html, url)
-        else:
-            print(f"未知类型 {stype}，跳过 {name}")
-            return
-    except Exception as e:
-        print(f"❌ 抓取 {name} 失败: {e}")
-        return
-    elapsed = time.time() - start_time
-    print(f"📌 {name} 原始抓取 {len(items)} 条 (耗时 {elapsed:.1f}s)")
-
-    # 按时间降序
-    items.sort(key=lambda x: parse_pubdate(x["pub"]) or datetime(1970,1,1, tzinfo=timezone.utc), reverse=True)
-    count = 0
-    for it in items:
-        if add_news(name, it["title"], it["link"], it["summary"], it["pub"], max_limit):
-            count += 1
-        if count >= max_limit:
-            break
-    print(f"✅ {name} 过滤后保留 {count} 条 (上限 {max_limit})")
-
-# ---------- 生成 HTML ----------
-def generate_html():
+# ---------- 主逻辑 ----------
+def main():
     bj_now = datetime.now(timezone(timedelta(hours=8)))
+    if not (6 <= bj_now.hour <= 23):
+        print(f"⏰ 当前北京时间 {bj_now.strftime('%H:%M')} 不在运行时段 (6:00-23:00)，退出。")
+        return
+
+    # 1. 加载历史新闻
+    history = load_history()
+    print(f"📂 加载历史新闻 {len(history)} 条")
+
+    # 2. 清理 3 天前的旧新闻（基于 pub_dt）
+    cutoff = datetime.now(timezone.utc) - timedelta(days=CUTOFF_DAYS)
+    valid_history = []
+    for item in history:
+        dt_str = item.get("pub_dt")  # 存储为 ISO 格式字符串
+        if dt_str:
+            try:
+                dt = datetime.fromisoformat(dt_str.replace('Z', '+00:00'))
+                if dt >= cutoff:
+                    valid_history.append(item)
+            except:
+                # 如果无法解析时间，保留该条目
+                valid_history.append(item)
+        else:
+            # 无时间字段，保留（可能为占位）
+            valid_history.append(item)
+    print(f"🗑️ 清理后保留 {len(valid_history)} 条（删除 {len(history)-len(valid_history)} 条）")
+
+    # 3. 抓取新新闻
+    global news_pool, source_counter
+    news_pool = []          # 用于存放本次新抓取的有效新闻
+    source_counter = {}
+
+    for key, cfg in SOURCES.items():
+        name = cfg["name_cn"]
+        url = cfg["url"]
+        stype = cfg["type"]
+        max_limit = SPECIAL_MAX.get(key, DEFAULT_MAX)
+        items = []
+        try:
+            if stype == "rss":
+                xml = fetch_rss(url)
+                items = parse_rss(xml)
+            elif stype == "web":
+                html = fetch_web(url)
+                items = parse_web_generic(html, url)
+            else:
+                continue
+        except Exception as e:
+            print(f"❌ 抓取 {name} 失败: {e}")
+            continue
+
+        print(f"📌 {name} 原始抓取 {len(items)} 条")
+
+        # 按时间降序排列并过滤关键词、去重（与历史合并去重）
+        items.sort(key=lambda x: parse_pubdate(x["pub"]) or datetime(1970,1,1, tzinfo=timezone.utc), reverse=True)
+        count = 0
+        for it in items:
+            # 构建临时新闻对象（用于去重）
+            title = it["title"]
+            url = it["link"]
+            # 检查是否与历史重复
+            duplicate = False
+            for h in valid_history:
+                if h.get("url") == url or h.get("title") == title:
+                    duplicate = True
+                    break
+            if duplicate:
+                continue
+            # 关键词过滤
+            if not is_relevant(title + " " + it["summary"]):
+                continue
+            # 时间解析
+            dt = parse_pubdate(it["pub"])
+            if dt is None:
+                # 无时间则用当前时间（但标记为未知）
+                dt = datetime(1970, 1, 1, tzinfo=timezone.utc)
+            # 时间过滤（只保留3天内）
+            if dt.year > 2000 and datetime.now(timezone.utc) - dt > timedelta(days=CUTOFF_DAYS):
+                continue
+
+            # 计算北京时间
+            if dt.year > 2000:
+                bj_dt = dt + timedelta(hours=8)
+                pub_beijing = bj_dt.strftime('%Y-%m-%d %H:%M:%S 北京时间')
+            else:
+                pub_beijing = "未知时间"
+
+            new_item = {
+                "source": name,
+                "title": title,
+                "url": url,
+                "summary": it["summary"],
+                "pub_raw": it["pub"],
+                "pub_dt": dt.isoformat(),
+                "pub_beijing": pub_beijing
+            }
+            news_pool.append(new_item)
+            count += 1
+            if count >= max_limit:
+                break
+        print(f"✅ {name} 本次新增 {count} 条")
+
+    # 4. 合并历史与本次新增
+    all_news = valid_history + news_pool
+    # 去重（按 url 和 title）
+    seen_urls = set()
+    seen_titles = set()
+    merged = []
+    for item in all_news:
+        url = item.get("url")
+        title = item.get("title")
+        if url and url in seen_urls:
+            continue
+        if title and title in seen_titles:
+            continue
+        if url:
+            seen_urls.add(url)
+        if title:
+            seen_titles.add(title)
+        merged.append(item)
+
+    # 5. 排序：按 pub_dt 降序（未知时间放最后）
+    merged.sort(key=lambda x: datetime.fromisoformat(x["pub_dt"].replace('Z', '+00:00')) if x.get("pub_dt") and x["pub_dt"] != "1970-01-01T00:00:00+00:00" else datetime(1970,1,1, tzinfo=timezone.utc), reverse=True)
+
+    # 6. 统计每个源的数量（只统计有效新闻，不区分新旧）
+    source_stat = {}
+    for item in merged:
+        src = item.get("source", "未知")
+        source_stat[src] = source_stat.get(src, 0) + 1
+
+    # 7. 输出 news.json（包含全部新闻）
+    save_news(merged, bj_now.strftime("%Y-%m-%d %H:%M:%S 北京时间"), source_stat)
+
+    # 8. 生成 HTML（直接使用合并后的数据，但顶部“最新新闻”只显示本次新增的 news_pool）
+    # 我们修改 generate_html 接收两个参数：全部新闻列表、本次新增列表
+    generate_html(merged, news_pool, bj_now)
+
+    print(f"🎉 采集完成，总新闻数 {len(merged)}，本次新增 {len(news_pool)} 条")
+
+# ---------- 生成 HTML（支持标记最新） ----------
+def generate_html(all_news, new_news, bj_now):
+    # 顶部仅显示本次新增新闻（按时间倒序排列）
+    top_news = sorted(new_news, key=lambda x: datetime.fromisoformat(x["pub_dt"].replace('Z', '+00:00')) if x.get("pub_dt") and x["pub_dt"] != "1970-01-01T00:00:00+00:00" else datetime(1970,1,1, tzinfo=timezone.utc), reverse=True)[:15]
+
+    # 分媒体板块显示全部新闻
+    grouped = {}
+    for item in all_news:
+        src = item.get("source", "未知")
+        if src not in grouped:
+            grouped[src] = []
+        grouped[src].append(item)
+
     html_content = f"""<!DOCTYPE html>
 <html lang="zh-CN">
 <head>
@@ -359,33 +442,77 @@ body {{ font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Hel
 .news-item .meta {{ font-size:14px; color:#888; display:flex; flex-wrap:wrap; gap:15px; margin-top:8px; }}
 .news-item .meta .source {{ background:#eef2f7; padding:2px 12px; border-radius:20px; color:#1e3c72; }}
 .news-item .summary {{ color:#666; font-size:15px; margin-top:8px; line-height:1.6; }}
-@media (max-width:600px) {{
-    .header {{ flex-direction:column; align-items:flex-start; gap:10px; }}
-    .news-item .title {{ font-size:16px; }}
+.top-latest-block {{
+    background:#0f2b59;
+    border-radius:12px;
+    padding:22px;
+    margin-bottom:24px;
+    color:#fff;
 }}
+.top-block-title {{
+    font-size:20px;
+    font-weight:600;
+    margin-bottom:16px;
+    border-left:5px solid #42a5f5;
+    padding-left:12px;
+}}
+.top-news-item {{
+    border-bottom:1px solid rgba(255,255,255,0.15);
+    padding:12px 8px;
+    cursor:pointer;
+    transition:background 0.2s;
+}}
+.top-news-item:hover {{ background:rgba(255,255,255,0.08); }}
+.top-cn-title {{ font-size:16px; font-weight:500; margin-bottom:4px; }}
+.top-meta-row {{ display:flex; gap:16px; font-size:12px; opacity:0.85; flex-wrap:wrap; }}
 </style>
 </head>
 <body>
 <div class="container">
     <div class="header">
         <h1>📰 国内新闻聚合</h1>
-        <div class="info">更新: {bj_now.strftime('%Y-%m-%d %H:%M:%S')} 北京时间 · 共 {len(news_pool)} 条</div>
+        <div class="info">更新: {bj_now.strftime('%Y-%m-%d %H:%M:%S')} 北京时间 · 共 {len(all_news)} 条</div>
+        <div class="info">本次新增 {len(new_news)} 条</div>
     </div>
-    <div class="news-list">
 """
-    if not news_pool:
-        html_content += "<p style='text-align:center;color:#999;'>暂无新闻，请稍后查看。</p>"
-    else:
-        for item in news_pool:
-            title = html.escape(item["title"]) if item["title"] else "（无标题）"
-            summary = html.escape(item["summary"])[:200] if item["summary"] else ""
+    # 顶部最新区域（只显示新增）
+    if top_news:
+        html_content += f"""
+    <div class="top-latest-block">
+        <div class="top-block-title">🔥 最新新闻（本次新抓取）</div>
+"""
+        for item in top_news:
+            title = html.escape(item.get("title", "无标题"))
+            source = item.get("source", "未知")
             pub_display = item.get("pub_beijing") or item.get("pub_raw") or "未知时间"
+            url = item.get("url", "#")
             html_content += f"""
-        <div class="news-item">
-            <div class="title"><a href="{item["url"]}" target="_blank">{title}</a></div>
+        <div class="top-news-item" onclick="window.open('{url}', '_blank')">
+            <div class="top-cn-title">{title}</div>
+            <div class="top-meta-row">
+                <span>来源：{source}</span>
+                <span>{pub_display}</span>
+            </div>
+        </div>
+"""
+        html_content += "</div>\n"
+
+    # 分媒体板块
+    html_content += '<div class="news-list">\n'
+    for media, items in grouped.items():
+        html_content += f'<div class="news-item"><div class="title" style="font-weight:bold;color:#1a365d;">{media}（{len(items)}条）</div></div>'
+        for item in items[:15]:  # 每个媒体最多显示15条（可根据需要调整）
+            title = html.escape(item.get("title", "无标题"))
+            summary = html.escape(item.get("summary", ""))[:200]
+            pub_display = item.get("pub_beijing") or item.get("pub_raw") or "未知时间"
+            url = item.get("url", "#")
+            source = item.get("source", "未知")
+            html_content += f"""
+        <div class="news-item" onclick="window.open('{url}', '_blank')">
+            <div class="title"><a href="{url}" target="_blank">{title}</a></div>
             <div class="summary">{summary}…</div>
             <div class="meta">
-                <span class="source">{item["source"]}</span>
+                <span class="source">{source}</span>
                 <span>🕒 {pub_display}</span>
             </div>
         </div>
@@ -398,48 +525,6 @@ body {{ font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Hel
 """
     with open("index.html", "w", encoding="utf-8") as f:
         f.write(html_content)
-
-# ---------- 主函数 ----------
-def main():
-    bj_now = datetime.now(timezone(timedelta(hours=8)))
-    if not (6 <= bj_now.hour <= 23):
-        print(f"⏰ 当前北京时间 {bj_now.strftime('%H:%M')} 不在运行时段 (6:00-23:00)，退出。")
-        return
-
-    global news_pool, source_counter
-    news_pool = []
-    source_counter = {}
-
-    for key, cfg in SOURCES.items():
-        process_source(key, cfg)
-        # 源之间休息 1 秒，避免被封
-        time.sleep(1)
-
-    # 全局排序：按 pub_dt 降序（1970-01-01 的排最后）
-    news_pool.sort(key=lambda x: x["pub_dt"], reverse=True)
-
-    output = {
-        "update_cst": bj_now.strftime("%Y-%m-%d %H:%M:%S 北京时间"),
-        "total_count": len(news_pool),
-        "source_stat": source_counter,
-        "news": [
-            {
-                "source": n["source"],
-                "title": n["title"],
-                "url": n["url"],
-                "summary": n["summary"],
-                "pub_raw": n["pub_raw"],
-                "pub_beijing": n["pub_beijing"],
-                "pub_time": n["pub_dt"].strftime('%Y-%m-%d %H:%M:%S') if n["pub_dt"].year > 2000 else "未知时间"
-            }
-            for n in news_pool
-        ]
-    }
-    with open("news.json", "w", encoding="utf-8") as f:
-        json.dump(output, f, ensure_ascii=False, indent=2)
-
-    generate_html()
-    print(f"🎉 采集完成，共 {len(news_pool)} 条新闻")
 
 if __name__ == "__main__":
     try:
