@@ -59,7 +59,7 @@ SOURCES = {
     },
     "ths": {
         "name_cn": "同花顺",
-        "url": "hhttps://www.10jqka.com.cn/classic",
+        "url": "https://www.10jqka.com.cn/classic",
         "type": "web"
     },
     "eastmoney": {
