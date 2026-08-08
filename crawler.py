@@ -59,17 +59,17 @@ SOURCES = {
     },
     "ths": {
         "name_cn": "同花顺",
-        "url": "https://www.10jqka.com.cn",
+        "url": "https://stock.10jqka.com.cn/ywjh_list",
         "type": "web"
     },
-    "phoenix": {
-        "name_cn": "凤凰网",
-        "url": "https://www.ifeng.com",
+    "eastmoney": {
+        "name_cn": "东财",
+        "url": "https://finance.eastmoney.com/yaowen.html",
         "type": "web"
     },
-    "sina": {
-        "name_cn": "新浪",
-        "url": "https://finance.sina.com.cn/stock",
+    "cls": {
+        "name_cn": "财联",
+        "url": "https://www.cls.cn/depth?id=1000",
         "type": "web"
     },
     "cctv": {
