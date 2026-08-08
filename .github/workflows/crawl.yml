@@ -24,7 +24,8 @@ jobs:
 
       # 3. 安装依赖（无第三方可省略）
       - name: Install dependencies
-        run: pip install --upgrade pip
+        run: |
+          pip install requests beautifulsoup4
 
       # 4. 执行爬虫
       - name: Run crawler
