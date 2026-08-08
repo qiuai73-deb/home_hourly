@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
 """
-国内新闻聚合爬虫｜修复网页时间错乱BUG
+国内新闻聚合爬虫｜修复网页时间错乱 + json.dump参数报错
 - RSS源时间100%准确，网页无时间标记统一显示未知
-- 关键词财经科技过滤
+- 关键词财经过滤
 - 自动生成news.json + index.html静态页面
 - 仅北京时间6:00~23:00运行
 """
@@ -218,14 +218,14 @@ def parse_pubdate(date_str):
                 return datetime(y, mon, d, h, mi, tzinfo=timezone.utc)
         except Exception:
             continue
-    # 仅月/日/时分，缺少年份直接返回None，不补当年
+    # 只有月日时分，缺少年份直接返回None
     return None
 
 # ---------- 全局存储容器 ----------
 news_pool = []
 source_counter = {}
 
-# ---------- 入库函数（核心修复：无时间不再填充当前时间） ----------
+# ---------- 入库函数（修复无时间填充当前时间BUG） ----------
 def add_news(source_name, title, url, summary, pub_raw, max_limit):
     if not title:
         return False
@@ -237,14 +237,14 @@ def add_news(source_name, title, url, summary, pub_raw, max_limit):
         return False
     # 解析发布时间
     dt = parse_pubdate(pub_raw)
-    # 有时间才判断7天时效，无时间不拦截
+    # 有时间才校验7天时效，无时间不丢弃
     if dt is not None and datetime.now(timezone.utc) - dt > timedelta(days=CUTOFF_DAYS):
         return False
-    # 标题/链接去重
+    # 链接/标题去重
     for item in news_pool:
         if item["url"] == url or item["title"] == title:
             return False
-    # 格式化北京时间
+    # 格式化北京时间展示文本
     if dt:
         bj_dt = dt + timedelta(hours=8)
         pub_beijing = bj_dt.strftime('%Y-%m-%d %H:%M:%S 北京时间')
@@ -262,7 +262,7 @@ def add_news(source_name, title, url, summary, pub_raw, max_limit):
     source_counter[source_name] = source_counter.get(source_name, 0) + 1
     return True
 
-# ---------- 单个源抓取入口 ----------
+# ---------- 单个媒体抓取逻辑 ----------
 def process_source(source_key, source_cfg):
     name = source_cfg["name_cn"]
     url = source_cfg["url"]
@@ -283,17 +283,17 @@ def process_source(source_key, source_cfg):
         print(f"❌ 抓取 {name} 失败: {e}")
         return
     print(f"📌 {name} 原始抓取 {len(items)} 条")
-    # 先按原始时间倒序
+    # 按时间倒序预处理
     items.sort(key=lambda x: parse_pubdate(x["pub"]) or datetime.min.replace(tzinfo=timezone.utc), reverse=True)
     count = 0
     for it in items:
-        if add_news(name, it["title"], it["link"], it["summary"], it["pub"], max_limit):
+        if add_news(name, it["link"], it["title"], it["summary"], it["pub"], max_limit):
             count += 1
         if count >= max_limit:
             break
     print(f"✅ {name} 过滤后保留 {count} 条 (上限 {max_limit})")
 
-# ---------- 自动生成前端 index.html ----------
+# ---------- 生成前端 index.html ----------
 def generate_html():
     bj_now = datetime.now(timezone(timedelta(hours=8)))
     html_content = f"""<!DOCTYPE html>
@@ -317,7 +317,7 @@ body {{ font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Hel
 .news-item .title a:hover {{ text-decoration:underline; }}
 .news-item .meta {{ font-size:14px; color:#888; display:flex; flex-wrap:wrap; gap:15px; margin-top:8px; }}
 .news-item .meta .source {{ background:#eef2f7; padding:2px 12px; border-radius:20px; color:#1e3c72; }}
-.news-item .summary {{ color:#666; font-size:15px; margin-top:8px; line-height:1.6; }}
+.news-item .summary {{ color:#666; font-size:15; margin-top:8px; line-height:1.6; }}
 @media (max-width:600px) {{
     .header {{ flex-direction:column; align-items:flex-start; gap:10px; }}
     .news-item .title {{ font-size:16px; }}
@@ -361,20 +361,20 @@ body {{ font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Hel
 # ---------- 主程序入口 ----------
 def main():
     bj_now = datetime.now(timezone(timedelta(hours=8)))
-    # 限制仅6~23点运行
+    # 仅北京时间6-23点运行
     if not (6 <= bj_now.hour <= 23):
         print(f"⏰ 当前北京时间 {bj_now.hour}:{bj_now.minute}，不在6:00-23:00运行时段，直接退出")
         return
     global news_pool, source_counter
     news_pool = []
     source_counter = {}
-    # 循环抓取所有媒体
+    # 遍历所有媒体
     for key, cfg in SOURCES.items():
         process_source(key, cfg)
         time.sleep(0.5)
     # 全局按发布时间倒序
     news_pool.sort(key=lambda x: x["pub_dt"] or datetime.min.replace(tzinfo=timezone.utc), reverse=True)
-    # 输出news.json
+    # 组装输出JSON
     output = {
         "update_cst": bj_now.strftime("%Y-%m-%d %H:%M:%S 北京时间"),
         "total_count": len(news_pool),
@@ -392,9 +392,10 @@ def main():
             for n in news_pool
         ]
     }
+    # 修复json.dump 缺少fp参数BUG
     with open("news.json", "w", encoding="utf-8") as f:
-        json.dump(output, ensure_ascii=False, indent=2)
-    # 生成静态网页
+        json.dump(output, f, ensure_ascii=False, indent=2)
+    # 生成网页
     generate_html()
     print(f"\n🎉 全部抓取完成，有效财经新闻共 {len(news_pool)} 条")
 
@@ -404,5 +405,6 @@ if __name__ == "__main__":
     except Exception as e:
         print(f"❌ 程序全局异常: {str(e)}")
         err_data = {"error": str(e)}
+        # 修复异常分支dump参数缺失
         with open("news.json", "w", encoding="utf-8") as f:
-            json.dump(err_data, ensure_ascii=False, indent=2)
+            json.dump(err_data, f, ensure_ascii=False, indent=2)
