@@ -1,5 +1,5 @@
 {
-  "update_cst": "2026-08-08 11:05:35 北京时间",
+  "update_cst": "2026-08-08 11:16:26 北京时间",
   "total_count": 37,
   "source_stat": {
     "财新": 5,
@@ -57,7 +57,7 @@
       "url": "https://www.kuzaobao.com/news/china/202608/0478043.html",
       "summary": "中国公布抹黑车企案例引“竹知了”联想 学者：华为维权符官方原则但存“泛侵权化”",
       "pub_raw": "",
-      "pub_time": "2026-08-08 03:05:52"
+      "pub_time": "2026-08-08 03:16:47"
     },
     {
       "source": "联合早报",
@@ -65,207 +65,111 @@
       "url": "https://www.kuzaobao.com/news/china/202608/0478040.html",
       "summary": "下午察：遥遥领先的华为败给小小“竹知了”？",
       "pub_raw": "",
-      "pub_time": "2026-08-08 03:05:52"
+      "pub_time": "2026-08-08 03:16:47"
     },
     {
-      "source": "财联",
-      "title": "金价本周大涨7%，再破4400美元，白银狂飙；国际油价累跌7%",
-      "url": "https://www.cls.cn/detail/2449008",
-      "summary": "金价本周大涨7%，再破4400美元，白银狂飙；国际油价累跌7%",
-      "pub_raw": "",
-      "pub_time": "2026-08-08 03:05:51"
+      "source": "同花顺",
+      "title": "*ST帅电：拟现金4.1亿元收购惠嘉科技",
+      "url": "http://stock.10jqka.com.cn/20260807/c678773544.shtml",
+      "summary": "*ST帅电：拟现金4.1亿元收购惠嘉科技",
+      "pub_raw": "8月8日",
+      "pub_time": "2026-08-08 00:00:00"
     },
     {
-      "source": "财联",
-      "title": "重大进展！伊朗官员确认：与阿曼就海峡通行问题明确总体框架",
-      "url": "https://www.cls.cn/detail/2449012",
-      "summary": "重大进展！伊朗官员确认：与阿曼就海峡通行问题明确总体框架",
-      "pub_raw": "",
-      "pub_time": "2026-08-08 03:05:51"
+      "source": "同花顺",
+      "title": "华林证券魏禹",
+      "url": "http://t.10jqka.com.cn/circle/10402/#refCountId=R_570dcecb_91",
+      "summary": "华林证券魏禹",
+      "pub_raw": "08月08日",
+      "pub_time": "2026-08-08 00:00:00"
     },
     {
-      "source": "财联",
-      "title": "三大项目获5800万美元融资支持",
-      "url": "https://www.cls.cn/detail/2448967",
-      "summary": "三大项目获5800万美元融资支持",
-      "pub_raw": "",
-      "pub_time": "2026-08-08 03:05:51"
+      "source": "同花顺",
+      "title": "首创证券纪旭",
+      "url": "http://t.10jqka.com.cn/circle/13289/#refCountId=R_570dcecb_91",
+      "summary": "首创证券纪旭",
+      "pub_raw": "08月08日",
+      "pub_time": "2026-08-08 00:00:00"
+    },
+    {
+      "source": "新浪",
+      "title": "下载新浪财经App,随时随地看突发新闻",
+      "url": "https://finance.sina.com.cn/desktopapp/download/index.shtml",
+      "summary": "下载新浪财经App,随时随地看突发新闻",
+      "pub_raw": "2026-08-08",
+      "pub_time": "2026-08-08 00:00:00"
+    },
+    {
+      "source": "新浪",
+      "title": "【国融基金总经理变更】根据国融基金8月8日公告，总经理毛灵俊因个人原因离任，总经理职位暂由张圆辉代任。根据国融基金安排，该公司董事会选举韩光华拟任公司总经理，待韩光华完成相关程序后履职。",
+      "url": "https://wap.cj.sina.cn/pc/7x24/5031796",
+      "summary": "【国融基金总经理变更】根据国融基金8月8日公告，总经理毛灵俊因个人原因离任，总经理职位暂由张圆辉代任。根据国融基金安排，该公司董事会选举韩光华拟任公司总经理，待韩光华完成相关程序后履职。",
+      "pub_raw": "2026-08-08",
+      "pub_time": "2026-08-08 00:00:00"
+    },
+    {
+      "source": "新浪",
+      "title": "纽约原油暗盘跌破77美元，日内跌超1.7%。",
+      "url": "https://wap.cj.sina.cn/pc/7x24/5031785",
+      "summary": "纽约原油暗盘跌破77美元，日内跌超1.7%。",
+      "pub_raw": "2026-08-08",
+      "pub_time": "2026-08-08 00:00:00"
+    },
+    {
+      "source": "新浪",
+      "title": "本周安达科技、广州酒家、荣昌生物等15只个股发布业绩预告，其中业绩大幅预增3只，百奥赛图净利润预测同比增长412.71%",
+      "url": "https://wap.cj.sina.cn/pc/7x24/5031781",
+      "summary": "本周安达科技、广州酒家、荣昌生物等15只个股发布业绩预告，其中业绩大幅预增3只，百奥赛图净利润预测同比增长412.71%",
+      "pub_raw": "2026-08-08",
+      "pub_time": "2026-08-08 00:00:00"
+    },
+    {
+      "source": "新浪",
+      "title": "加拿大公共部门养老金投资委员会（PSP Investments）正考虑以15亿美元的价格出售其在印度的公路资产。",
+      "url": "https://wap.cj.sina.cn/pc/7x24/5031771",
+      "summary": "加拿大公共部门养老金投资委员会（PSP Investments）正考虑以15亿美元的价格出售其在印度的公路资产。",
+      "pub_raw": "2026-08-08",
+      "pub_time": "2026-08-08 00:00:00"
     },
     {
       "source": "财联",
       "title": "特朗普宣布：将向关键矿产和电池项目投资30亿美元",
       "url": "https://www.cls.cn/detail/2449039",
       "summary": "特朗普宣布：将向关键矿产和电池项目投资30亿美元",
-      "pub_raw": "",
-      "pub_time": "2026-08-08 03:05:51"
+      "pub_raw": "8月8日",
+      "pub_time": "2026-08-08 00:00:00"
     },
     {
       "source": "财联",
-      "title": "美股盘前要闻一览：苹果上调多款设备以旧换新回收价格；SK海力士拟投资380亿美元新建两座晶圆厂；美国7月“大非农”数据来袭",
-      "url": "https://www.cls.cn/detail/2448748",
-      "summary": "美股盘前要闻一览：苹果上调多款设备以旧换新回收价格；SK海力士拟投资380亿美元新建两座晶圆厂；美国7月“大非农”数据来袭",
-      "pub_raw": "",
-      "pub_time": "2026-08-08 03:05:51"
+      "title": "三大项目获5800万美元融资支持",
+      "url": "https://www.cls.cn/detail/2448967",
+      "summary": "三大项目获5800万美元融资支持",
+      "pub_raw": "8月8日",
+      "pub_time": "2026-08-08 00:00:00"
     },
     {
-      "source": "新浪",
-      "title": "中国概念股",
-      "url": "http://finance.sina.com.cn/stock/usstock/cnlist.html",
-      "summary": "中国概念股",
-      "pub_raw": "",
-      "pub_time": "2026-08-08 03:05:48"
+      "source": "财联",
+      "title": "重大进展！伊朗官员确认：与阿曼就海峡通行问题明确总体框架",
+      "url": "https://www.cls.cn/detail/2449012",
+      "summary": "重大进展！伊朗官员确认：与阿曼就海峡通行问题明确总体框架",
+      "pub_raw": "8月8日",
+      "pub_time": "2026-08-08 00:00:00"
     },
     {
-      "source": "新浪",
-      "title": "新浪财经芝麻AI",
-      "url": "https://ai.finance.sina.cn?symbol=pcsy",
-      "summary": "新浪财经芝麻AI",
-      "pub_raw": "",
-      "pub_time": "2026-08-08 03:05:48"
+      "source": "财联",
+      "title": "金价本周大涨7%，再破4400美元，白银狂飙；国际油价累跌7%",
+      "url": "https://www.cls.cn/detail/2449008",
+      "summary": "金价本周大涨7%，再破4400美元，白银狂飙；国际油价累跌7%",
+      "pub_raw": "8月8日",
+      "pub_time": "2026-08-08 00:00:00"
     },
     {
-      "source": "新浪",
-      "title": "新浪财经APP",
-      "url": "https://finance.sina.com.cn/mobile/comfinanceweb.shtml?source=caishou04",
-      "summary": "新浪财经APP",
-      "pub_raw": "",
-      "pub_time": "2026-08-08 03:05:48"
-    },
-    {
-      "source": "新浪",
-      "title": "聚焦2026基金二季报",
-      "url": "https://finance.sina.com.cn/zt_d/jjjjejb2026",
-      "summary": "聚焦2026基金二季报",
-      "pub_raw": "",
-      "pub_time": "2026-08-08 03:05:48"
-    },
-    {
-      "source": "新浪",
-      "title": "新浪财经全球资本峰会",
-      "url": "https://finance.sina.com.cn/zt_d/subject-1783394329/",
-      "summary": "新浪财经全球资本峰会",
-      "pub_raw": "",
-      "pub_time": "2026-08-08 03:05:48"
-    },
-    {
-      "source": "东财",
-      "title": "告别算力内卷：AI基建狂潮下，铜、铝、稀土的下一站在哪？",
-      "url": "https://finance.eastmoney.com/a/202606113768272213.html",
-      "summary": "告别算力内卷：AI基建狂潮下，铜、铝、稀土的下一站在哪？",
-      "pub_raw": "",
-      "pub_time": "2026-08-08 03:05:45"
-    },
-    {
-      "source": "东财",
-      "title": "私募究竟是谁在投？ 有钱人是如何做投资的？| 对话百亿私募总经理衍复投资顾王琴",
-      "url": "https://finance.eastmoney.com/a/202607023792170473.html",
-      "summary": "私募究竟是谁在投？ 有钱人是如何做投资的？| 对话百亿私募总经理衍复投资顾王琴",
-      "pub_raw": "",
-      "pub_time": "2026-08-08 03:05:45"
-    },
-    {
-      "source": "东财",
-      "title": "8月7日晚间沪深上市公司重大事项公告最新快递",
-      "url": "https://finance.eastmoney.com/a/202608073835369671.html",
-      "summary": "8月7日晚间沪深上市公司重大事项公告最新快递",
-      "pub_raw": "",
-      "pub_time": "2026-08-08 03:05:45"
-    },
-    {
-      "source": "东财",
-      "title": "高盛“唱多”+Rubin规模出货 PCB概念掀涨停潮！多只中报预增股获资金青睐(名单)",
-      "url": "https://finance.eastmoney.com/a/202608073835005718.html",
-      "summary": "高盛“唱多”+Rubin规模出货 PCB概念掀涨停潮！多只中报预增股获资金青睐(名单)",
-      "pub_raw": "",
-      "pub_time": "2026-08-08 03:05:45"
-    },
-    {
-      "source": "东财",
-      "title": "A股三大指数涨幅均超过1% 稀土与创新药板块大涨",
-      "url": "https://finance.eastmoney.com/a/202608073835146843.html",
-      "summary": "A股三大指数涨幅均超过1% 稀土与创新药板块大涨",
-      "pub_raw": "",
-      "pub_time": "2026-08-08 03:05:45"
-    },
-    {
-      "source": "同花顺",
-      "title": "江苏激光芯片“小巨人”度亘核芯IPO开始问询",
-      "url": "http://news.10jqka.com.cn/20260808/c678777868.shtml",
-      "summary": "江苏激光芯片“小巨人”度亘核芯IPO开始问询",
-      "pub_raw": "",
-      "pub_time": "2026-08-08 03:05:43"
-    },
-    {
-      "source": "同花顺",
-      "title": "发行市值近610亿元！宇树科技IPO定价150.80元/股！",
-      "url": "https://stock.10jqka.com.cn/20260807/c678739180.shtml",
-      "summary": "发行市值近610亿元！宇树科技IPO定价150.80元/股！",
-      "pub_raw": "",
-      "pub_time": "2026-08-08 03:05:43"
-    },
-    {
-      "source": "同花顺",
-      "title": "磷化铟景气度高涨 3只概念股获机构积极关注（附名单）",
-      "url": "https://field.10jqka.com.cn/20260807/c678740115.shtml",
-      "summary": "磷化铟景气度高涨 3只概念股获机构积极关注（附名单）",
-      "pub_raw": "",
-      "pub_time": "2026-08-08 03:05:43"
-    },
-    {
-      "source": "同花顺",
-      "title": "英伟达拟下调Rubin Ultra显存配置",
-      "url": "https://t.10jqka.com.cn/pid_671987897.shtml",
-      "summary": "英伟达拟下调Rubin Ultra显存配置",
-      "pub_raw": "",
-      "pub_time": "2026-08-08 03:05:43"
-    },
-    {
-      "source": "同花顺",
-      "title": "OpenAI：免费版升级为GPT-5.6 Luna 付费版模型强化",
-      "url": "https://t.10jqka.com.cn/pid_671986798.shtml",
-      "summary": "OpenAI：免费版升级为GPT-5.6 Luna 付费版模型强化",
-      "pub_raw": "",
-      "pub_time": "2026-08-08 03:05:43"
-    },
-    {
-      "source": "同花顺",
-      "title": "ChatGPT时代首次 “科技七巨头”财报引爆超预期波动",
-      "url": "https://t.10jqka.com.cn/pid_671985421.shtml",
-      "summary": "ChatGPT时代首次 “科技七巨头”财报引爆超预期波动",
-      "pub_raw": "",
-      "pub_time": "2026-08-08 03:05:43"
-    },
-    {
-      "source": "同花顺",
-      "title": "短剧行业洗牌加速 AI催生投资新机遇",
-      "url": "https://field.10jqka.com.cn/20260807/c678737742.shtml",
-      "summary": "短剧行业洗牌加速 AI催生投资新机遇",
-      "pub_raw": "",
-      "pub_time": "2026-08-08 03:05:43"
-    },
-    {
-      "source": "同花顺",
-      "title": "证监会行业",
-      "url": "http://q.10jqka.com.cn/stock/zjhhy/",
-      "summary": "证监会行业",
-      "pub_raw": "",
-      "pub_time": "2026-08-08 03:05:43"
-    },
-    {
-      "source": "同花顺",
-      "title": "AI开放平台",
-      "url": "https://aimiai.com/",
-      "summary": "AI开放平台",
-      "pub_raw": "",
-      "pub_time": "2026-08-08 03:05:43"
-    },
-    {
-      "source": "同花顺",
-      "title": "T+0基金",
-      "url": "http://fund.10jqka.com.cn/public/class/emptyfund/emptyfund.html",
-      "summary": "T+0基金",
-      "pub_raw": "",
-      "pub_time": "2026-08-08 03:05:43"
+      "source": "财联",
+      "title": "政策轮番鼓励，银行理财直接权益敞口为何缩水？",
+      "url": "https://www.cls.cn/detail/2448898",
+      "summary": "政策轮番鼓励，银行理财直接权益敞口为何缩水？",
+      "pub_raw": "8月8日",
+      "pub_time": "2026-08-08 00:00:00"
     },
     {
       "source": "雪球",
@@ -306,6 +210,102 @@
       "summary": "      最近没关注老窖，所以没啥特别想法。球友想听，随便聊聊。最近行业焦点其实在五粮液，茅台已结束周期安稳上岸，不需要特别关注。普五一天价格不涨，高度国窖一天销售承压，这是不同品牌势能和历史底蕴。降价和挺价之争告一段落，降价容易提价难，五粮液想还是能做到的。如果今年普五回到原价，那老窖这轮周期就赢麻了。国窖和普五之间的批价间隔没了，品牌间隔也就没了。相比自己周期前，国窖品牌势能更强了。我是长期看好老窖，仓位代表一切。但短期来看，老窖的财报出清还没结束，毕竟秉持的是时间换空间。二季报是最后做差窗口期，三四季度因为去年基数低，加上其他白酒企业",
       "pub_raw": "Fri, 07 Aug 2026 10:04:39 GMT",
       "pub_time": "2026-08-07 10:04:39"
+    },
+    {
+      "source": "同花顺",
+      "title": "国融基金总经理变更",
+      "url": "http://fund.10jqka.com.cn/20260808/c678788023.shtml",
+      "summary": "国融基金总经理变更",
+      "pub_raw": "08月07日 7日年化收益",
+      "pub_time": "2026-08-07 00:00:00"
+    },
+    {
+      "source": "同花顺",
+      "title": "主动权益“大厂”竞相入局 ETF市场迎新机遇",
+      "url": "http://fund.10jqka.com.cn/20260808/c678777635.shtml",
+      "summary": "主动权益“大厂”竞相入局 ETF市场迎新机遇",
+      "pub_raw": "08月07日 7日年化收益",
+      "pub_time": "2026-08-07 00:00:00"
+    },
+    {
+      "source": "同花顺",
+      "title": "公募出海再迎政策利好 全球化布局驶入深水区",
+      "url": "http://fund.10jqka.com.cn/20260808/c678777633.shtml",
+      "summary": "公募出海再迎政策利好 全球化布局驶入深水区",
+      "pub_raw": "08月07日 7日年化收益",
+      "pub_time": "2026-08-07 00:00:00"
+    },
+    {
+      "source": "同花顺",
+      "title": "股价腰斩之际，葛卫东逆势加仓存储龙头！曾喊话AI没结束",
+      "url": "http://fund.10jqka.com.cn/20260807/c678767845.shtml",
+      "summary": "股价腰斩之际，葛卫东逆势加仓存储龙头！曾喊话AI没结束",
+      "pub_raw": "08月07日 7日年化收益",
+      "pub_time": "2026-08-07 00:00:00"
+    },
+    {
+      "source": "同花顺",
+      "title": "中欧基金策略会：2026下半年，科技、债市走势如何？",
+      "url": "http://bond.10jqka.com.cn/20260807/c678767157.shtml",
+      "summary": "中欧基金策略会：2026下半年，科技、债市走势如何？",
+      "pub_raw": "08月07日 7日年化收益",
+      "pub_time": "2026-08-07 00:00:00"
+    },
+    {
+      "source": "同花顺",
+      "title": "三国防务协议落地，黄金市场正在交易一个更大的变量？",
+      "url": "http://invest.10jqka.com.cn/20260807/c678770406.shtml",
+      "summary": "三国防务协议落地，黄金市场正在交易一个更大的变量？",
+      "pub_raw": "8月7日",
+      "pub_time": "2026-08-07 00:00:00"
+    },
+    {
+      "source": "同花顺",
+      "title": "避险情绪升温 美元指数围绕百点关口震荡",
+      "url": "http://fe.10jqka.com.cn/20260808/c678777936.shtml",
+      "summary": "避险情绪升温 美元指数围绕百点关口震荡",
+      "pub_raw": "8月7日",
+      "pub_time": "2026-08-07 00:00:00"
+    },
+    {
+      "source": "东财",
+      "title": "A股三大指数涨幅均超过1% 稀土与创新药板块大涨",
+      "url": "https://finance.eastmoney.com/a/202608073835146843.html",
+      "summary": "A股三大指数涨幅均超过1% 稀土与创新药板块大涨",
+      "pub_raw": "8月7日",
+      "pub_time": "2026-08-07 00:00:00"
+    },
+    {
+      "source": "东财",
+      "title": "高盛“唱多”+Rubin规模出货 PCB概念掀涨停潮！多只中报预增股获资金青睐(名单)",
+      "url": "https://finance.eastmoney.com/a/202608073835005718.html",
+      "summary": "高盛“唱多”+Rubin规模出货 PCB概念掀涨停潮！多只中报预增股获资金青睐(名单)",
+      "pub_raw": "8月7日",
+      "pub_time": "2026-08-07 00:00:00"
+    },
+    {
+      "source": "东财",
+      "title": "8月7日晚间沪深上市公司重大事项公告最新快递",
+      "url": "https://finance.eastmoney.com/a/202608073835369671.html",
+      "summary": "8月7日晚间沪深上市公司重大事项公告最新快递",
+      "pub_raw": "8月7日",
+      "pub_time": "2026-08-07 00:00:00"
+    },
+    {
+      "source": "东财",
+      "title": "私募究竟是谁在投？ 有钱人是如何做投资的？| 对话百亿私募总经理衍复投资顾王琴",
+      "url": "https://finance.eastmoney.com/a/202607023792170473.html",
+      "summary": "私募究竟是谁在投？ 有钱人是如何做投资的？| 对话百亿私募总经理衍复投资顾王琴",
+      "pub_raw": "8月7日",
+      "pub_time": "2026-08-07 00:00:00"
+    },
+    {
+      "source": "东财",
+      "title": "告别算力内卷：AI基建狂潮下，铜、铝、稀土的下一站在哪？",
+      "url": "https://finance.eastmoney.com/a/202606113768272213.html",
+      "summary": "告别算力内卷：AI基建狂潮下，铜、铝、稀土的下一站在哪？",
+      "pub_raw": "8月7日",
+      "pub_time": "2026-08-07 00:00:00"
     }
   ]
 }
