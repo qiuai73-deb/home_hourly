@@ -1,12 +1,9 @@
 #!/usr/bin/env python3
 """
-国内多源新闻聚合爬虫（详情页时间提取版）
-- 每个源默认 5 条，同花顺 10 条
-- 增强时间提取：从详情页获取精确发布时间
-- 计算并显示北京时间（优先）
-- 关键词过滤
-- 生成 index.html 和 news.json
-- 仅在 6:00~23:00（北京时间）执行
+国内多源新闻聚合爬虫（性能优化版）
+- 降低候选链接上限，减少解析开销
+- 缩短超时，增加容错
+- 时间提取优化
 """
 
 import ssl
@@ -24,12 +21,14 @@ import requests
 from bs4 import BeautifulSoup
 
 # ---------- 配置 ----------
-DEFAULT_MAX = 5              # 普通源最多保留条数
-SPECIAL_MAX = {"ths": 10}    # 同花顺特殊设置 10 条
-CUTOFF_DAYS = 7              # 只保留最近 7 天
+DEFAULT_MAX = 5
+SPECIAL_MAX = {"ths": 10}
+CUTOFF_DAYS = 7
 USER_AGENT = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) Chrome/120.0.0.0 Safari/537.36"
+FETCH_TIMEOUT = 10           # 缩短超时
+MAX_CANDIDATES = 50          # 每个源只取前50个候选链接，够用
 
-# ---------- 关键词过滤 ----------
+# ---------- 关键词 ----------
 KEYWORDS = [
     "GDP", "降息", "加息", "LPR", "央行", "美元", "人民币", "金融", "消费", "券商","证券",
     "地产", "财经", "突发", "重大","独家", "重大", "黄金","CPI","路透","彭博","周期",
@@ -47,45 +46,17 @@ def is_relevant(text: str) -> bool:
 
 # ---------- 新闻源 ----------
 SOURCES = {
-    "caixin": {
-        "name_cn": "财新",
-        "url": "https://quanwenrss.com/caixin",
-        "type": "rss"
-    },
-    "snowball": {
-        "name_cn": "雪球",
-        "url": "https://xueqiu.com/hots/topic/rss",
-        "type": "rss"
-    },
-    "ths": {
-        "name_cn": "同花顺",
-        "url": "https://www.10jqka.com.cn/classic",
-        "type": "web"
-    },
-    "eastmoney": {
-        "name_cn": "东财",
-        "url": "https://finance.eastmoney.com",
-        "type": "web"
-    },
-    "sina": {
-        "name_cn": "新浪",
-        "url": "https://finance.sina.com.cn/roll/#pageid=384&lid=2671&k=&num=50&page=1",
-        "type": "web"
-    },
-    "cls": {
-        "name_cn": "财联",
-        "url": "https://www.cls.cn",
-        "type": "web"
-    },
-    "zaobao": {
-        "name_cn": "联合早报",
-        "url": "https://www.kuzaobao.com/plus/list.php?tid=1",
-        "type": "web"
-    }
+    "caixin": {"name_cn": "财新", "url": "https://quanwenrss.com/caixin", "type": "rss"},
+    "snowball": {"name_cn": "雪球", "url": "https://xueqiu.com/hots/topic/rss", "type": "rss"},
+    "ths": {"name_cn": "同花顺", "url": "https://www.10jqka.com.cn/classic", "type": "web"},
+    "eastmoney": {"name_cn": "东财", "url": "https://finance.eastmoney.com", "type": "web"},
+    "sina": {"name_cn": "新浪", "url": "https://finance.sina.com.cn/roll/#pageid=384&lid=2671&k=&num=50&page=1", "type": "web"},
+    "cls": {"name_cn": "财联", "url": "https://www.cls.cn", "type": "web"},
+    "zaobao": {"name_cn": "联合早报", "url": "https://www.kuzaobao.com/plus/list.php?tid=1", "type": "web"}
 }
 
 # ---------- 网络请求 ----------
-def fetch_rss(url, timeout=15):
+def fetch_rss(url, timeout=FETCH_TIMEOUT):
     ctx = ssl.create_default_context()
     ctx.check_hostname = False
     ctx.verify_mode = ssl.CERT_NONE
@@ -93,7 +64,7 @@ def fetch_rss(url, timeout=15):
     with urllib.request.urlopen(req, timeout=timeout, context=ctx) as resp:
         return resp.read().decode("utf-8", "replace")
 
-def fetch_web(url, timeout=15):
+def fetch_web(url, timeout=FETCH_TIMEOUT):
     headers = {"User-Agent": USER_AGENT}
     resp = requests.get(url, headers=headers, timeout=timeout)
     resp.encoding = resp.apparent_encoding or 'utf-8'
@@ -125,95 +96,39 @@ def parse_rss(xml_text):
             results.append({"title": title, "link": link, "summary": summary, "pub": pub})
     return results
 
-# ---------- 从详情页提取时间 ----------
-def extract_time_from_detail_page(html):
-    """
-    从新闻详情页中提取发布时间
-    返回时间字符串，若未找到返回空字符串
-    """
-    soup = BeautifulSoup(html, "html.parser")
-    # 常见的时间元素选择器
-    time_selectors = [
-        'time',
-        'span.time',
-        'span.date',
-        'div.time',
-        'div.date',
-        '.pub-time',
-        '.publish-time',
-        '.article-time',
-        '.post-time',
-        '.meta-time',
-        '.source-time',
-        'span[class*="time"]',
-        'div[class*="time"]',
-        'span[class*="date"]',
-        'div[class*="date"]',
-        '.article-info span',
-        '.article-meta span',
-        '.news-info span',
-        '.content-info span',
-    ]
-    for selector in time_selectors:
-        elements = soup.select(selector)
-        for el in elements:
-            text = el.get_text(strip=True)
-            if text and len(text) >= 4:
-                # 检查是否包含时间格式
-                if re.search(r'\d{4}[-/年]\d{1,2}[-/月]\d{1,2}', text) or re.search(r'\d{1,2}:\d{2}', text):
-                    return text
-    # 如果没有专门的时间标签，尝试在页面头部/底部搜索日期模式
-    body_text = soup.get_text(separator=' ', strip=True)
-    patterns = [
-        r'(\d{4}-\d{1,2}-\d{1,2} \d{1,2}:\d{2})',
-        r'(\d{4}/\d{1,2}/\d{1,2} \d{1,2}:\d{2})',
-        r'(\d{4}年\d{1,2}月\d{1,2}日 \d{1,2}:\d{2})',
-        r'(\d{1,2}月\d{1,2}日 \d{1,2}:\d{2})',
-    ]
-    for pat in patterns:
-        m = re.search(pat, body_text)
-        if m:
-            return m.group(1)
-    return ""
-
-# ---------- 列表页时间提取（增强版） ----------
+# ---------- 时间提取（轻量优化） ----------
 def extract_time_from_element(element):
-    """
-    从元素及其父级中智能提取时间字符串（增强版）
-    """
-    for parent in [element] + list(element.parents)[:5]:
+    """轻量级时间提取，只查找最近的父级"""
+    # 只检查元素自身和往上2层，减少开销
+    for parent in [element] + list(element.parents)[:2]:
         if parent is None:
             continue
-        for tag in parent.find_all(['time', 'span', 'div', 'p', 'em', 'i', 'b']):
+        # 查找时间标签
+        for tag in parent.find_all(['time', 'span', 'div', 'p']):
             class_str = ' '.join(tag.get('class', []))
-            if any(k in class_str.lower() for k in ['time', 'date', 'pub', 'publish', 'post', 'info', 'meta', 'source', 'from']):
+            if any(k in class_str.lower() for k in ['time', 'date', 'pub', 'publish', 'post', 'info', 'meta']):
                 text = tag.get_text(strip=True)
                 if text and len(text) >= 4:
                     return text
             dt = tag.get('datetime')
             if dt:
                 return dt
-        if parent.name and parent.name not in ['a', 'span', 'p']:
+        # 在父级文本中快速搜索时间模式（只匹配第一个）
+        if parent.name and parent.name not in ['a', 'span']:
             text = parent.get_text(separator=' ', strip=True)
-            patterns = [
-                r'\d{4}-\d{1,2}-\d{1,2} \d{1,2}:\d{2}',
-                r'\d{4}/\d{1,2}/\d{1,2} \d{1,2}:\d{2}',
-                r'\d{4}年\d{1,2}月\d{1,2}日 \d{1,2}:\d{2}',
-                r'\d{1,2}月\d{1,2}日 \d{1,2}:\d{2}',
-                r'\d{1,2}:\d{2}',
-                r'\d{4}-\d{1,2}-\d{1,2}',
-                r'\d{1,2}-\d{1,2} \d{1,2}:\d{2}',
-                r'\d{4}/\d{1,2}/\d{1,2}',
-                r'\d{1,2}月\d{1,2}日',
-                r'\d{4}年\d{1,2}月\d{1,2}日',
-            ]
-            for pat in patterns:
-                m = re.search(pat, text)
-                if m:
-                    return m.group()
+            # 优先匹配含时分
+            m = re.search(r'\d{4}-\d{1,2}-\d{1,2} \d{1,2}:\d{2}', text) or \
+                re.search(r'\d{4}/\d{1,2}/\d{1,2} \d{1,2}:\d{2}', text) or \
+                re.search(r'\d{4}年\d{1,2}月\d{1,2}日 \d{1,2}:\d{2}', text) or \
+                re.search(r'\d{1,2}月\d{1,2}日 \d{1,2}:\d{2}', text) or \
+                re.search(r'\d{1,2}:\d{2}', text) or \
+                re.search(r'\d{4}-\d{1,2}-\d{1,2}', text) or \
+                re.search(r'\d{1,2}月\d{1,2}日', text)
+            if m:
+                return m.group()
     return ""
 
-# ---------- Web 解析（增加详情页时间提取） ----------
+# ---------- Web 解析（精简） ----------
 def parse_web_generic(html, base_url):
     soup = BeautifulSoup(html, "html.parser")
     candidates = []
@@ -236,48 +151,32 @@ def parse_web_generic(html, base_url):
             continue
         seen_urls.add(full_url)
 
-        # 优先从列表页提取时间（备用）
-        pub_list = extract_time_from_element(a)
-
-        # 尝试从详情页提取更精确的时间（仅对http链接，避免不必要的请求）
-        pub_detail = ""
-        if full_url.startswith('http'):
-            try:
-                detail_html = fetch_web(full_url, timeout=8)
-                pub_detail = extract_time_from_detail_page(detail_html)
-            except Exception:
-                pass
-            # 避免请求过快
-            time.sleep(0.2)
-
-        # 优先使用详情页时间，否则用列表页时间
-        pub = pub_detail if pub_detail else pub_list
-
+        pub = extract_time_from_element(a)
         candidates.append({
             "title": title,
             "link": full_url,
             "summary": title,
             "pub": pub
         })
-        if len(candidates) >= 200:
+        if len(candidates) >= MAX_CANDIDATES:
             break
     return candidates
 
-# ---------- 时间解析（用于排序和格式化） ----------
+# ---------- 时间解析（用于排序） ----------
 def parse_pubdate(date_str):
     if not date_str:
         return None
     date_str = date_str.strip()
     patterns = [
-        r'\w{3}, (\d{1,2}) (\w{3}) (\d{4}) (\d{2}):(\d{2}):(\d{2})',  # RSS
-        r'(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2})',                   # ISO
-        r'(\d{4})-(\d{2})-(\d{2}) (\d{2}):(\d{2})',                   # 标准
-        r'(\d{4})年(\d{1,2})月(\d{1,2})日 (\d{1,2}):(\d{2})',         # 中文完整
-        r'(\d{1,2})月(\d{1,2})日 (\d{1,2}):(\d{2})',                  # 月日 时:分
-        r'(\d{4})年(\d{1,2})月(\d{1,2})日',                           # 中文日期
-        r'(\d{4})/(\d{1,2})/(\d{1,2})',                               # 斜杠
-        r'(\d{1,2})月(\d{1,2})日',                                    # 月日
-        r'(\d{1,2}):(\d{2})',                                         # 仅时间
+        r'\w{3}, (\d{1,2}) (\w{3}) (\d{4}) (\d{2}):(\d{2}):(\d{2})',
+        r'(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2})',
+        r'(\d{4})-(\d{2})-(\d{2}) (\d{2}):(\d{2})',
+        r'(\d{4})年(\d{1,2})月(\d{1,2})日 (\d{1,2}):(\d{2})',
+        r'(\d{1,2})月(\d{1,2})日 (\d{1,2}):(\d{2})',
+        r'(\d{4})年(\d{1,2})月(\d{1,2})日',
+        r'(\d{4})/(\d{1,2})/(\d{1,2})',
+        r'(\d{1,2})月(\d{1,2})日',
+        r'(\d{1,2}):(\d{2})',
     ]
     for pat in patterns:
         m = re.match(pat, date_str)
@@ -467,7 +366,7 @@ def main():
 
     for key, cfg in SOURCES.items():
         process_source(key, cfg)
-        time.sleep(0.5)
+        time.sleep(0.5)  # 源间间隔
 
     news_pool.sort(key=lambda x: x["pub_dt"], reverse=True)
 
