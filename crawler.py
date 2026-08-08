@@ -59,17 +59,17 @@ SOURCES = {
     },
     "ths": {
         "name_cn": "同花顺",
-        "url": "https://news.10jqka.com.cn/realtimenews.html",
+        "url": "https://m.10jqka.com.cn",
         "type": "web"
     },
     "eastmoney": {
         "name_cn": "东财",
-        "url": "https://finance.eastmoney.com/a/cywjh.html",
+        "url": "https://wap.eastmoney.com/channel/list.html?channel=8&column=345",
         "type": "web"
     },
     "sina": {
         "name_cn": "新浪",
-        "url": "https://finance.sina.com.cn/roll/#pageid=384&lid=2671&k=&num=50&page=1",
+        "url": "https://finance.sina.cn/?vt=4&cid=76524&node_id=76524",
         "type": "web"
     },
     "cls": {
