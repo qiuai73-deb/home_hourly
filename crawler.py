@@ -1,9 +1,18 @@
+    "GDP", "降息", "加息", "LPR", "央行", "美元", "人民币", "金融", "消费", "券商","证券",
+    "地产", "财经", "突发", "重大","独家", "重大", "黄金","CPI","路透","彭博","周期",
+    "A股", "指数", "创业", "科创", "基金", "ETF", "回购", "增持", "IPO","资金","利率",
+    "纳斯达克", "证监会", "私募", "公募", "标普", "龙头", "指数","涨停","概念","利空",
+    "AI", "大模型", "芯片", "半导体", "华为", "鸿蒙", "新能源", "苹果",
+    "科技", "deepseek", "比亚迪", "小米", "大疆", "字节", "腾讯", "阿里","知情人士",
+    "微信", "英伟达", "谷歌", "抖音", "kimi", "豆包","年报","龙头",
+    "银行", "高盛", "利润", "统计局", "大摩", "小摩", "汇率", "特朗普"
 #!/usr/bin/env python3
 """
-国内多源新闻聚合爬虫（精准版）
-- 每个网页源使用专用解析函数
-- 关键词过滤（标题或摘要包含任意关键词）
+国内多源新闻聚合爬虫（稳健版）
+- 使用通用 a 标签遍历策略，兼容各类网站结构
+- 关键词过滤（标题或摘要含关键词）
 - 每个源最多 15 条
+- 未知时间自动设为当前时间
 - 生成 index.html 和 news.json
 - 仅在 6:00~23:00（北京时间）执行
 """
@@ -17,13 +26,14 @@ from datetime import datetime, timedelta, timezone
 import html
 import urllib.request
 import urllib.parse
+from urllib.parse import urljoin
 
 import requests
 from bs4 import BeautifulSoup
 
 # ---------- 配置 ----------
-MAX_PER_SOURCE = 15         # 每源最多保留条数
-CUTOFF_DAYS = 3             # 只保留最近3天
+MAX_PER_SOURCE = 15
+CUTOFF_DAYS = 7             # 放宽到7天，避免旧新闻被丢弃
 USER_AGENT = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) Chrome/120.0.0.0 Safari/537.36"
 
 # ---------- 关键词过滤 ----------
@@ -40,12 +50,10 @@ KEYWORDS = [
 KEYWORD_PATTERN = re.compile('|'.join(KEYWORDS), re.IGNORECASE)
 
 def is_relevant(text: str) -> bool:
-    """检查文本是否包含任一关键词"""
     return bool(KEYWORD_PATTERN.search(text))
 
-# ---------- 新闻源配置 ----------
+# ---------- 新闻源 ----------
 SOURCES = {
-    # RSS 源
     "caixin": {
         "name_cn": "财新",
         "url": "https://quanwenrss.com/caixin",
@@ -56,36 +64,30 @@ SOURCES = {
         "url": "https://xueqiu.com/hots/topic/rss",
         "type": "rss"
     },
-    # 网页源（每个源都有专属解析函数）
     "ths": {
         "name_cn": "同花顺",
         "url": "https://www.10jqka.com.cn",
-        "type": "web",
-        "parser": "parse_ths"
+        "type": "web"
     },
     "phoenix": {
         "name_cn": "凤凰网",
         "url": "https://www.ifeng.com",
-        "type": "web",
-        "parser": "parse_phoenix"
+        "type": "web"
     },
     "sina": {
         "name_cn": "新浪",
         "url": "https://finance.sina.com.cn/stock",
-        "type": "web",
-        "parser": "parse_sina"
+        "type": "web"
     },
     "cctv": {
         "name_cn": "央视新闻",
         "url": "https://news.cctv.cn/china",
-        "type": "web",
-        "parser": "parse_cctv"
+        "type": "web"
     },
     "zaobao": {
         "name_cn": "联合早报",
         "url": "https://www.kuzaobao.com/plus/list.php?tid=1",
-        "type": "web",
-        "parser": "parse_zaobao"
+        "type": "web"
     }
 }
 
@@ -130,128 +132,8 @@ def parse_rss(xml_text):
             results.append({"title": title, "link": link, "summary": summary, "pub": pub})
     return results
 
-# ---------- 各网站专用解析函数 ----------
-def parse_ths(html, base_url):
-    """同花顺首页解析"""
-    soup = BeautifulSoup(html, "html.parser")
-    items = []
-    # 同花顺首页新闻通常位于 .news-item 或 .article-item 或 ul.news-list li
-    containers = soup.select("div.news-item, div.article-item, ul.news-list li, div.list-item")
-    for c in containers:
-        a = c.find("a")
-        if not a:
-            continue
-        title = a.get_text(strip=True)
-        link = a.get("href", "")
-        if not title or len(title) < 5:
-            continue
-        if link.startswith("/"):
-            link = urllib.parse.urljoin(base_url, link)
-        elif not link.startswith("http"):
-            continue
-        # 提取时间
-        time_tag = c.find("span", class_=re.compile(r"time|date")) or c.find("time")
-        pub = time_tag.get_text(strip=True) if time_tag else ""
-        items.append({"title": title, "link": link, "summary": title, "pub": pub})
-    return items
-
-def parse_phoenix(html, base_url):
-    """凤凰网首页解析"""
-    soup = BeautifulSoup(html, "html.parser")
-    items = []
-    # 凤凰网新闻通常位于 .news-item, .article-item, .index-news-item
-    containers = soup.select("div.news-item, div.article-item, div.index-news-item, div.focus-news-item, ul.list li")
-    for c in containers:
-        a = c.find("a")
-        if not a:
-            continue
-        title = a.get_text(strip=True)
-        link = a.get("href", "")
-        if not title or len(title) < 5:
-            continue
-        if link.startswith("/"):
-            link = urllib.parse.urljoin(base_url, link)
-        elif not link.startswith("http"):
-            continue
-        time_tag = c.find("span", class_=re.compile(r"time|date")) or c.find("time")
-        pub = time_tag.get_text(strip=True) if time_tag else ""
-        items.append({"title": title, "link": link, "summary": title, "pub": pub})
-    return items
-
-def parse_sina(html, base_url):
-    """新浪财经解析"""
-    soup = BeautifulSoup(html, "html.parser")
-    items = []
-    # 新浪财经新闻列表常见结构
-    containers = soup.select("ul.list li, div.list-item, div.article-item, div.news-item")
-    for c in containers:
-        a = c.find("a")
-        if not a:
-            continue
-        title = a.get_text(strip=True)
-        link = a.get("href", "")
-        if not title or len(title) < 5:
-            continue
-        if link.startswith("/"):
-            link = urllib.parse.urljoin(base_url, link)
-        elif not link.startswith("http"):
-            continue
-        time_tag = c.find("span", class_=re.compile(r"time|date")) or c.find("time")
-        pub = time_tag.get_text(strip=True) if time_tag else ""
-        items.append({"title": title, "link": link, "summary": title, "pub": pub})
-    return items
-
-def parse_cctv(html, base_url):
-    """央视新闻解析"""
-    soup = BeautifulSoup(html, "html.parser")
-    items = []
-    # 央视新闻列表
-    containers = soup.select("ul.list li, div.news-item, div.article-item, div.list-item")
-    for c in containers:
-        a = c.find("a")
-        if not a:
-            continue
-        title = a.get_text(strip=True)
-        link = a.get("href", "")
-        if not title or len(title) < 5:
-            continue
-        if link.startswith("/"):
-            link = urllib.parse.urljoin(base_url, link)
-        elif not link.startswith("http"):
-            continue
-        time_tag = c.find("span", class_=re.compile(r"time|date")) or c.find("time")
-        pub = time_tag.get_text(strip=True) if time_tag else ""
-        items.append({"title": title, "link": link, "summary": title, "pub": pub})
-    return items
-
-def parse_zaobao(html, base_url):
-    """联合早报（镜像站）解析"""
-    soup = BeautifulSoup(html, "html.parser")
-    items = []
-    # 联合早报列表常见结构
-    containers = soup.select("ul.list li, div.list-item, div.article-item, div.news-item")
-    for c in containers:
-        a = c.find("a")
-        if not a:
-            continue
-        title = a.get_text(strip=True)
-        link = a.get("href", "")
-        if not title or len(title) < 5:
-            continue
-        if link.startswith("/"):
-            link = urllib.parse.urljoin(base_url, link)
-        elif not link.startswith("http"):
-            continue
-        time_tag = c.find("span", class_=re.compile(r"time|date")) or c.find("time")
-        pub = time_tag.get_text(strip=True) if time_tag else ""
-        items.append({"title": title, "link": link, "summary": title, "pub": pub})
-    return items
-
-# ---------- 通用备用解析（增强） ----------
+# ---------- Web 解析（稳健策略：遍历所有 a 标签） ----------
 def parse_web_generic(html, base_url):
-    """
-    使用 fetch_news.py 的稳健策略：提取所有 a 标签，智能过滤
-    """
     soup = BeautifulSoup(html, "html.parser")
     candidates = []
     seen_urls = set()
@@ -259,7 +141,7 @@ def parse_web_generic(html, base_url):
 
     for a in soup.find_all("a", href=True):
         title = a.get_text(strip=True)
-        raw_url = a["href"]
+        raw_url = a.get("href", "")
         if not raw_url or raw_url.startswith('#') or raw_url.startswith('javascript:'):
             continue
         # 补全链接
@@ -267,29 +149,30 @@ def parse_web_generic(html, base_url):
         # 排除根域名本身
         if full_url.strip('/') == base_url.strip('/'):
             continue
-        # 标题长度过滤（至少 5 个字符，避免导航）
+        # 标题长度过滤（至少5个字符）
         if len(title) < 5 or len(title) > 100:
             continue
-        # 排除功能按钮
+        # 排除功能性文字
         if any(k in title for k in invalid_keywords):
             continue
         # 去重
         if full_url in seen_urls:
             continue
         seen_urls.add(full_url)
-        # 尝试提取时间（若有）
+
+        # 尝试提取时间（如果有）
         pub = ""
         time_tag = a.find_previous("time") or a.find_next("time")
         if time_tag:
             pub = time_tag.get("datetime") or time_tag.get_text(strip=True)
-        # 若没有时间，留空（后续设为当前时间）
+        # 如果找不到时间，留空（后续处理为当前时间）
         candidates.append({
             "title": title,
             "link": full_url,
             "summary": title,
             "pub": pub
         })
-        if len(candidates) >= 200:  # 限制候选数量，防止过多
+        if len(candidates) >= 200:   # 防止过多
             break
 
     return candidates
@@ -305,6 +188,7 @@ def parse_pubdate(date_str):
         r'(\d{4})-(\d{2})-(\d{2}) (\d{2}):(\d{2})',
         r'(\d{4})年(\d{1,2})月(\d{1,2})日',
         r'(\d{4})/(\d{1,2})/(\d{1,2})',
+        r'(\d{1,2})月(\d{1,2})日',
     ]
     for pat in patterns:
         m = re.match(pat, date_str)
@@ -322,9 +206,17 @@ def parse_pubdate(date_str):
                 elif len(groups) == 3:
                     y, mon, d = map(int, groups)
                     return datetime(y, mon, d, tzinfo=timezone.utc)
+                elif len(groups) == 2:
+                    mon, d = map(int, groups)
+                    now = datetime.now(timezone.utc)
+                    y = now.year
+                    dt = datetime(y, mon, d, tzinfo=timezone.utc)
+                    if dt > now:
+                        dt = datetime(y-1, mon, d, tzinfo=timezone.utc)
+                    return dt
             except:
                 continue
-    # 尝试提取数字
+    # 尝试提取数字（如 "2026-08-07"）
     nums = re.findall(r'\d+', date_str)
     if len(nums) >= 3:
         try:
@@ -339,15 +231,34 @@ def parse_pubdate(date_str):
 news_pool = []
 source_counter = {}
 
-def add_news(...):
+def add_news(source_name, title, url, summary, pub_raw):
+    if not title:
+        return False
+    # 关键词过滤
+    if not is_relevant(title + " " + summary):
+        return False
+    if source_counter.get(source_name, 0) >= MAX_PER_SOURCE:
+        return False
     dt = parse_pubdate(pub_raw)
     if dt is None:
-        dt = datetime.now(timezone.utc)  # 未知时间则使用当前时间
-    # 不要强制 CUTOFF_DAYS，只对明显旧新闻（如超过7天）丢弃，或直接不丢弃
-    # 若仍需时间过滤，可放宽到 7 天
-    if datetime.now(timezone.utc) - dt > timedelta(days=7):
+        dt = datetime.now(timezone.utc)   # 未知时间使用当前时间
+    # 时间过滤（放宽到7天）
+    if datetime.now(timezone.utc) - dt > timedelta(days=CUTOFF_DAYS):
         return False
-    # 其余逻辑...
+    # 去重
+    for item in news_pool:
+        if item["url"] == url or item["title"] == title:
+            return False
+    news_pool.append({
+        "source": source_name,
+        "title": title,
+        "url": url,
+        "summary": summary,
+        "pub_raw": pub_raw,
+        "pub_dt": dt
+    })
+    source_counter[source_name] = source_counter.get(source_name, 0) + 1
+    return True
 
 def process_source(source_key, source_cfg):
     name = source_cfg["name_cn"]
@@ -359,25 +270,18 @@ def process_source(source_key, source_cfg):
             xml = fetch_rss(url)
             items = parse_rss(xml)
         elif stype == "web":
-            html_text = fetch_web(url)
-            parser_name = source_cfg.get("parser", "")
-            if parser_name:
-                parser_func = globals().get(parser_name)
-                if parser_func:
-                    items = parser_func(html_text, url)
-                else:
-                    print(f"未找到解析器 {parser_name}，使用通用解析")
-                    items = parse_generic(html_text, url)
-            else:
-                items = parse_generic(html_text, url)
+            html = fetch_web(url)
+            items = parse_web_generic(html, url)
         else:
             print(f"未知类型 {stype}，跳过 {name}")
             return
     except Exception as e:
-        print(f"抓取 {name} 失败: {e}")
+        print(f"❌ 抓取 {name} 失败: {e}")
         return
 
-    # 按时间降序
+    print(f"📌 {name} 原始抓取 {len(items)} 条")
+
+    # 按时间降序（未知时间排最后）
     items.sort(key=lambda x: parse_pubdate(x["pub"]) or datetime.min.replace(tzinfo=timezone.utc), reverse=True)
     count = 0
     for it in items:
@@ -385,9 +289,9 @@ def process_source(source_key, source_cfg):
             count += 1
         if count >= MAX_PER_SOURCE:
             break
-    print(f"从 {name} 抓取到 {count} 条有效新闻（过滤后）")
+    print(f"✅ {name} 过滤后保留 {count} 条")
 
-# ---------- 生成 HTML（与之前相同） ----------
+# ---------- 生成 HTML ----------
 def generate_html():
     bj_now = datetime.now(timezone(timedelta(hours=8)))
     html_content = f"""<!DOCTYPE html>
@@ -460,7 +364,7 @@ body {{ font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Hel
 def main():
     bj_now = datetime.now(timezone(timedelta(hours=8)))
     if not (6 <= bj_now.hour <= 23):
-        print(f"当前北京时间 {bj_now.strftime('%H:%M')} 不在运行时段 (6:00-23:00)，退出。")
+        print(f"⏰ 当前北京时间 {bj_now.strftime('%H:%M')} 不在运行时段 (6:00-23:00)，退出。")
         return
 
     global news_pool, source_counter
@@ -492,7 +396,7 @@ def main():
         json.dump(output, f, ensure_ascii=False, indent=2)
 
     generate_html()
-    print(f"✅ 采集完成，共 {len(news_pool)} 条新闻")
+    print(f"🎉 采集完成，共 {len(news_pool)} 条新闻")
 
 if __name__ == "__main__":
     try:
