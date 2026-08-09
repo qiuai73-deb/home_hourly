@@ -1,8 +1,8 @@
 {
-  "update_cst": "2026-08-09 08:05:27 北京时间",
-  "total_count": 52,
+  "update_cst": "2026-08-09 10:05:24 北京时间",
+  "total_count": 53,
   "source_stat": {
-    "财新": 10,
+    "财新": 11,
     "雪球": 15,
     "新浪": 8,
     "财联": 7,
@@ -11,6 +11,15 @@
     "联合早报": 2
   },
   "news": [
+    {
+      "source": "财新",
+      "title": "财新闻｜多家上市公司宣布：收到美国关税退税",
+      "url": "https://mini.caixin.com/2026-08-09/102472638.html",
+      "summary": "美国加利福尼亚州洛杉矶港。图：视觉中国央行连续21个月增持黄金，最新数据披露国家外汇管理局8月7",
+      "pub_raw": "Sun, 09 Aug 2026 09:37:39 +0800",
+      "pub_dt": "2026-08-09T09:37:39+00:00",
+      "pub_beijing": "2026-08-09 17:37:39 北京时间"
+    },
     {
       "source": "财新",
       "title": "离岸信托90天补税窗口期疑问",
@@ -400,18 +409,18 @@
     },
     {
       "source": "新浪",
-      "title": "山东最大城商行，迎来新任行长！多家上市银行高管密集变动",
-      "url": "https://cj.sina.cn/article/norm_detail?url=https%3A%2F%2Ffinance.sina.com.cn%2Fmoney%2Fbank%2F2026-08-09%2Fdoc-inimshaz5937239.shtml",
-      "summary": "山东最大城商行，迎来新任行长！多家上市银行高管密集变动",
+      "title": "小摩：九龙仓置业升至“增持”评级 目标价大幅上调至35.7港元",
+      "url": "https://cj.sina.cn/article/norm_detail?url=https%3A%2F%2Ffinance.sina.com.cn%2Fstock%2Fhkstock%2Fhkgg%2F2026-08-09%2Fdoc-inimsnkt2071237.shtml",
+      "summary": "小摩：九龙仓置业升至“增持”评级 目标价大幅上调至35.7港元",
       "pub_raw": "",
       "pub_dt": "1970-01-01T00:00:00+00:00",
       "pub_beijing": "未知时间"
     },
     {
       "source": "新浪",
-      "title": "人均浮亏22万！杠杆ETF缘何突然走红，让韩国70万散户深陷泥潭？",
-      "url": "https://cj.sina.cn/article/norm_detail?url=https%3A%2F%2Ffinance.sina.com.cn%2Fstock%2Froll%2F2026-08-09%2Fdoc-inimshax9163339.shtml",
-      "summary": "人均浮亏22万！杠杆ETF缘何突然走红，让韩国70万散户深陷泥潭？",
+      "title": "美银证券：百济神州重申“买入”评级 目标价升至255.43港元",
+      "url": "https://cj.sina.cn/article/norm_detail?url=https%3A%2F%2Ffinance.sina.com.cn%2Fstock%2Fhkstock%2Fhkgg%2F2026-08-09%2Fdoc-inimsnkt2070350.shtml",
+      "summary": "美银证券：百济神州重申“买入”评级 目标价升至255.43港元",
       "pub_raw": "",
       "pub_dt": "1970-01-01T00:00:00+00:00",
       "pub_beijing": "未知时间"
@@ -427,6 +436,15 @@
     },
     {
       "source": "财联",
+      "title": "2026年7月份CPI保持温和上涨 PPI同比涨幅有所回落",
+      "url": "https://www.cls.cn/detail/2449215",
+      "summary": "2026年7月份CPI保持温和上涨 PPI同比涨幅有所回落",
+      "pub_raw": "",
+      "pub_dt": "1970-01-01T00:00:00+00:00",
+      "pub_beijing": "未知时间"
+    },
+    {
+      "source": "财联",
       "title": "Apple智能可配合阿里千问模型工作；江波龙定增大幅溢价",
       "url": "https://www.cls.cn/detail/2449188",
       "summary": "Apple智能可配合阿里千问模型工作；江波龙定增大幅溢价",
@@ -436,27 +454,18 @@
     },
     {
       "source": "财联",
+      "title": "利润大涨超100%，这一行业，黄金窗口期来了",
+      "url": "https://www.cls.cn/detail/2449206",
+      "summary": "利润大涨超100%，这一行业，黄金窗口期来了",
+      "pub_raw": "",
+      "pub_dt": "1970-01-01T00:00:00+00:00",
+      "pub_beijing": "未知时间"
+    },
+    {
+      "source": "财联",
       "title": "巴菲特退休后伯克希尔首次大举动用现金 Q2回购并净买入股票",
       "url": "https://www.cls.cn/detail/2449170",
       "summary": "巴菲特退休后伯克希尔首次大举动用现金 Q2回购并净买入股票",
-      "pub_raw": "",
-      "pub_dt": "1970-01-01T00:00:00+00:00",
-      "pub_beijing": "未知时间"
-    },
-    {
-      "source": "财联",
-      "title": "AI硬件涨价潮传导3C租赁：需求翻倍，租赁商拆售显卡内存|一线",
-      "url": "https://www.cls.cn/detail/2449139",
-      "summary": "AI硬件涨价潮传导3C租赁：需求翻倍，租赁商拆售显卡内存|一线",
-      "pub_raw": "",
-      "pub_dt": "1970-01-01T00:00:00+00:00",
-      "pub_beijing": "未知时间"
-    },
-    {
-      "source": "财联",
-      "title": "多家A股公司：收到美国关税退税",
-      "url": "https://www.cls.cn/detail/2449086",
-      "summary": "多家A股公司：收到美国关税退税",
       "pub_raw": "",
       "pub_dt": "1970-01-01T00:00:00+00:00",
       "pub_beijing": "未知时间"
